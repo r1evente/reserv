@@ -4,156 +4,246 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Autós Helyfoglalás</title>
+
   <style>
-    /* Alapstílusok */
     body {
       font-family: Arial, sans-serif;
+      background: #f4f4f4;
       margin: 0;
       padding: 0;
-      background-color: #f4f4f4;
     }
 
     header {
-      background-color: #333;
+      background: #333;
       color: white;
       text-align: center;
       padding: 20px;
     }
 
     main {
-      padding: 20px;
+      padding: 15px;
     }
 
-    h1, h2 {
-      color: #333;
-    }
-
-    form {
-      background-color: white;
-      padding: 20px;
+    form, table {
+      background: white;
+      padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
 
     label {
-      display: block;
-      margin-bottom: 8px;
+      font-size: 1.1em;
     }
 
     input, select {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
+      margin-top: 5px;
       margin-bottom: 12px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
+      font-size: 1em;
     }
 
     button {
-      background-color: #4CAF50;
+      width: 100%;
+      background: #4CAF50;
       color: white;
-      padding: 10px 20px;
+      padding: 12px;
+      font-size: 1.2em;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #45a049;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+    }
+
+    table th, table td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: center;
+      font-size: 0.95em;
+    }
+
+    .free-seats-box {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .free-seats-box p {
+      margin: 5px 0;
+      font-size: 1.2em;
+      font-weight: bold;
     }
 
     footer {
+      background: #333;
+      color: white;
       text-align: center;
       padding: 10px;
-      background-color: #333;
-      color: white;
       position: fixed;
       width: 100%;
       bottom: 0;
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>Autós Helyfoglalás - Péntek és Szombat</h1>
-  </header>
 
-  <main>
-    <section>
-      <h2>Foglalj helyet az autómban!</h2>
-      <form id="bookingForm">
-        <label for="name">Neved:</label>
-        <input type="text" id="name" required>
+<header>
+  <h1>Autós Helyfoglalás – Péntek és Vasárnap</h1>
+</header>
 
-        <label for="day">Válassz napot:</label>
-        <select id="day" required>
-          <option value="friday">Péntek</option>
-          <option value="saturday">Szombat</option>
-        </select>
+<main>
 
-        <label for="seats">Hány helyet szeretnél foglalni?</label>
-        <input type="number" id="seats" min="1" max="4" required>
+  <div class="free-seats-box">
+    <p id="fridaySeats">Péntek: 4 szabad hely</p>
+    <p id="sundaySeats">Vasárnap: 4 szabad hely</p>
+  </div>
 
-        <button type="submit">Foglalás</button>
-      </form>
-    </section>
+  <form id="bookingForm">
+    <label for="name">Neved:</label>
+    <input type="text" id="name" required>
 
-    <section>
-      <h2>Foglalások</h2>
-      <ul id="bookingList">
-        <!-- Foglalások itt fognak megjelenni -->
-      </ul>
-    </section>
-  </main>
+    <label for="day">Válassz napot:</label>
+    <select id="day" required>
+      <option value="friday">Péntek</option>
+      <option value="sunday">Vasárnap</option>
+    </select>
 
-  <footer>
-    <p>&copy; 2025 Autós Helyfoglalás</p>
-  </footer>
+    <label for="seats">Hány helyet szeretnél foglalni?</label>
+    <input type="number" id="seats" min="1" max="4" required>
 
-  <script>
-    // script.js
+    <button type="submit">Foglalás</button>
+  </form>
 
-    const bookingList = document.getElementById('bookingList');
-    const bookingForm = document.getElementById('bookingForm');
+  <h2>Foglalások</h2>
 
-    let bookings = {
-      friday: [],
-      saturday: [],
-    };
+  <table>
+    <thead>
+      <tr>
+        <th>Név</th>
+        <th>Nap</th>
+        <th>Dátum</th>
+        <th>Időpont</th>
+        <th>Hely</th>
+      </tr>
+    </thead>
+    <tbody id="bookingTableBody"></tbody>
+  </table>
 
-    bookingForm.addEventListener('submit', function(event) {
-      event.preventDefault();
+</main>
 
-      const name = document.getElementById('name').value;
-      const day = document.getElementById('day').value;
-      const seats = parseInt(document.getElementById('seats').value);
+<footer>
+  <p>&copy; 2025 Autós Helyfoglalás</p>
+</footer>
 
-      if (seats <= 0 || seats > 4) {
-        alert('Maximálisan 4 helyet foglalhatsz.');
-        return;
-      }
+<script>
+  const form = document.getElementById("bookingForm");
+  const tableBody = document.getElementById("bookingTableBody");
 
-      const newBooking = { name, seats, day };
-      bookings[day].push(newBooking);
-      
-      // Foglalások frissítése a listán
-      updateBookingList(day);
-      
-      // űrlap tisztítása
-      bookingForm.reset();
+  const fridaySeatsLabel = document.getElementById("fridaySeats");
+  const sundaySeatsLabel = document.getElementById("sundaySeats");
+
+  const MAX_SEATS = 4;
+
+  let bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+
+  function getNextDate(dayName) {
+    const today = new Date();
+    const day = today.getDay();
+    let target = dayName === "friday" ? 5 : 0;
+
+    let diff = target - day;
+    if (diff <= 0) diff += 7;
+
+    const targetDate = new Date();
+    targetDate.setDate(today.getDate() + diff);
+
+    return targetDate.toISOString().split("T")[0];
+  }
+
+  function removeExpiredBookings() {
+    const today = new Date().toISOString().split("T")[0];
+    bookings = bookings.filter(b => b.date >= today);
+    localStorage.setItem("bookings", JSON.stringify(bookings));
+  }
+
+  removeExpiredBookings();
+
+  function renderTable() {
+    tableBody.innerHTML = "";
+
+    bookings.forEach(b => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${b.name}</td>
+        <td>${b.day === "friday" ? "Péntek" : "Vasárnap"}</td>
+        <td>${b.date}</td>
+        <td>${b.time}</td>
+        <td>${b.seats}</td>
+      `;
+
+      tableBody.appendChild(row);
     });
 
-    // Foglalások megjelenítése
-    function updateBookingList(day) {
-      const dayBookings = bookings[day];
-      bookingList.innerHTML = '';
-      
-      dayBookings.forEach(booking => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${booking.name} - ${booking.seats} hely(${booking.day === 'friday' ? 'Péntek' : 'Szombat'})`;
-        bookingList.appendChild(listItem);
-      });
+    updateFreeSeats();
+  }
+
+  function updateFreeSeats() {
+    const fridayUsed = bookings
+      .filter(b => b.day === "friday")
+      .reduce((sum, b) => sum + b.seats, 0);
+
+    const sundayUsed = bookings
+      .filter(b => b.day === "sunday")
+      .reduce((sum, b) => sum + b.seats, 0);
+
+    fridaySeatsLabel.textContent = `Péntek: ${MAX_SEATS - fridayUsed} szabad hely`;
+    sundaySeatsLabel.textContent = `Vasárnap: ${MAX_SEATS - sundayUsed} szabad hely`;
+  }
+
+  renderTable();
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const day = document.getElementById("day").value;
+    const seats = parseInt(document.getElementById("seats").value);
+
+    const date = getNextDate(day);
+    const time = new Date().toLocaleTimeString("hu-HU");
+
+    // Ellenőrzés: van-e elég szabad hely?
+    const used = bookings
+      .filter(b => b.day === day)
+      .reduce((sum, b) => sum + b.seats, 0);
+
+    if (used + seats > MAX_SEATS) {
+      alert("Nincs elég szabad hely erre a napra!");
+      return;
     }
-  </script>
+
+    const newBooking = { name, day, seats, date, time };
+    bookings.push(newBooking);
+
+    localStorage.setItem("bookings", JSON.stringify(bookings));
+
+    renderTable();
+    form.reset();
+  });
+</script>
+
 </body>
 </html>
