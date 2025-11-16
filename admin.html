@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin — Autós Helyfoglalás</title>
   <style>
     body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:0}
@@ -15,6 +14,8 @@
     th,td{padding:10px;border-bottom:1px solid #eee;text-align:center}
     .muted{color:#666;font-size:.95rem}
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="wrap">
@@ -31,29 +32,18 @@
     <div id="adminArea" style="display:none">
       <div class="card">
         <h2>Admin kezelőfelület</h2>
-        <div class="muted">Itt törölhetsz foglalásokat, újraszámolhatod az üléseket vagy törölhetsz mindent.</div>
-
+        <div class="muted">Itt törölhetsz foglalásokat, újraszámolhatod az üléseket vagy exportálhatod.</div>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
           <button id="reassignBtn">Ülések újraszámolása</button>
           <button id="deleteAllBtn" class="danger">Összes foglalás törlése</button>
           <button id="exportBtn">Exportálás (JSON)</button>
           <button id="logoutBtn" style="margin-left:auto">Kijelentkezés</button>
         </div>
-
-        <div style="margin-top:12px" class="muted">
-          Megjegyzés: a rendszer a következő Péntek/Vasárnap dátumokra tárolja a foglalásokat.
-        </div>
       </div>
 
       <div class="card">
         <h3>Foglalások (minden)</h3>
-        <div class="muted">Kattints a törlés ikonra egy foglalás eltávolításához.</div>
-        <table id="adminTable">
-          <thead>
-            <tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ülések</th><th>Művelet</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <table id="adminTable"><thead><tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ülések</th><th>Művelet</th></tr></thead><tbody></tbody></table>
       </div>
     </div>
 
@@ -61,131 +51,136 @@
   </div>
 
 <script>
-const STORAGE_KEY = "bookings";
-let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-const ADMIN_PWD = "admin";
+/* ----- CONFIG: cseréld ki ugyanazzal a FIREBASE_CONFIG objecttel, mint az index.html-ben ----- */
+const FIREBASE_CONFIG = {
+ apiKey: "AIzaSyBpUMFd8bvIU8IPLmbbxznkH1rwVvEE2vM",
+  authDomain: "reservations-7d03f.firebaseapp.com",
+  databaseURL: "https://reservations-7d03f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "reservations-7d03f",
+  storageBucket: "reservations-7d03f.firebasestorage.app",
+  messagingSenderId: "543288569908",
+  appId: "1:543288569908:web:db904e1f6c013246deda61",
+  measurementId: "G-M7YJVQ1BHC"
+};
+/* ------------------------------------------------------------------------------ */
 
-const loginBtn = document.getElementById("loginBtn");
-const pwd = document.getElementById("pwd");
-const loginMsg = document.getElementById("loginMsg");
-const adminArea = document.getElementById("adminArea");
-const adminTbody = document.querySelector("#adminTable tbody");
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
+const bookingsRef = db.ref('bookings');
 
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); }
+const ADMIN_PWD = 'admin'; // egyszerű jelszó (prototípushoz)
 
-// belépés
-loginBtn.addEventListener("click", ()=>{
+// UI
+const loginBtn = document.getElementById('loginBtn');
+const pwd = document.getElementById('pwd');
+const loginMsg = document.getElementById('loginMsg');
+const adminArea = document.getElementById('adminArea');
+const adminTbody = document.querySelector('#adminTable tbody');
+
+let bookings = [];
+
+// listen realtime
+bookingsRef.on('value', snap=>{
+  const val = snap.val() || {};
+  bookings = Object.keys(val).map(k => val[k]);
+  renderAdminTable();
+});
+
+loginBtn.addEventListener('click', ()=>{
   if(pwd.value === ADMIN_PWD){
-    loginMsg.textContent = "Sikeres belépés.";
-    adminArea.style.display = "block";
-    document.querySelector(".card").scrollIntoView({behavior:"smooth"});
+    loginMsg.textContent = 'Sikeres belépés';
+    adminArea.style.display = 'block';
+    pwd.value = '';
     renderAdminTable();
-  } else {
-    loginMsg.textContent = "Hibás jelszó.";
-  }
+  } else loginMsg.textContent = 'Hibás jelszó';
 });
 
-// kijelentkezés
-document.getElementById("logoutBtn").addEventListener("click", ()=>{
-  adminArea.style.display = "none";
-  pwd.value = "";
-  loginMsg.textContent = "";
-});
-
-// render admin tábla
+// render admin table
 function renderAdminTable(){
-  bookings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  adminTbody.innerHTML = "";
-  if(bookings.length === 0){
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 6; td.textContent = "Nincsenek foglalások."; td.style.color="#666";
-    tr.appendChild(td); adminTbody.appendChild(tr); return;
+  adminTbody.innerHTML = '';
+  if(!bookings || bookings.length === 0){
+    const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan=6; td.textContent='Nincsenek foglalások.'; td.style.color='#666'; tr.appendChild(td); adminTbody.appendChild(tr); return;
   }
-  // rendezzük
-  bookings.slice().sort((a,b)=> a.date === b.date ? a.createdAt - b.createdAt : (a.date > b.date ? 1 : -1))
-    .forEach((b, idx)=>{
-      const tr = document.createElement("tr");
-      const tdName = document.createElement("td"); tdName.textContent = b.name;
-      const tdDay = document.createElement("td"); tdDay.textContent = (b.day==="friday"?"Péntek":"Vasárnap");
-      const tdDate = document.createElement("td"); tdDate.textContent = b.date;
-      const tdTime = document.createElement("td"); tdTime.textContent = b.time;
-      const tdSeats = document.createElement("td"); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
-        if(i===0) return "Sofőr";
-        if(i===1) return "Első utas";
-        if(i===2) return "Hátsó bal";
-        return "Hátsó jobb";
-      }).join(", ");
-      const tdAction = document.createElement("td");
-      const delBtn = document.createElement("button"); delBtn.textContent = "Törlés"; delBtn.style.background="#e74c3c"; delBtn.style.color="#fff"; delBtn.style.border="none"; delBtn.style.padding="6px 10px"; delBtn.style.borderRadius="6px"; delBtn.style.cursor="pointer";
-      delBtn.addEventListener("click", ()=>{
-        if(!confirm("Biztos törlöd a foglalást?")) return;
-        bookings = bookings.filter(x => x.id !== b.id);
-        save(); renderAdminTable(); alert("Törölve.");
-      });
-      tdAction.appendChild(delBtn);
-
-      tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
-      adminTbody.appendChild(tr);
+  bookings.slice().sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date > b.date ? 1 : -1)).forEach(b=>{
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td'); tdName.textContent = b.name;
+    const tdDay = document.createElement('td'); tdDay.textContent = (b.day==='friday'?'Péntek':'Vasárnap');
+    const tdDate = document.createElement('td'); tdDate.textContent = b.date;
+    const tdTime = document.createElement('td'); tdTime.textContent = b.time;
+    const tdSeats = document.createElement('td'); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
+      if(i===1) return 'Első utas';
+      if(i===2) return 'Hátsó bal';
+      if(i===3) return 'Hátsó közép';
+      if(i===4) return 'Hátsó jobb';
+      return '';
+    }).join(', ');
+    const tdAction = document.createElement('td');
+    const delBtn = document.createElement('button'); delBtn.textContent = 'Törlés'; delBtn.style.background='#e74c3c'; delBtn.style.color='#fff'; delBtn.style.border='none'; delBtn.style.padding='6px 10px'; delBtn.style.borderRadius='6px'; delBtn.style.cursor='pointer';
+    delBtn.addEventListener('click', async ()=>{
+      if(!confirm('Biztos törlöd a foglalást?')) return;
+      // delete in firebase by child id (bookings stored by push key maybe -> find key)
+      // to delete we must find the child whose value.id === b.id
+      const snapshot = await bookingsRef.once('value');
+      const obj = snapshot.val() || {};
+      for(const key in obj){
+        if(obj[key].id === b.id){
+          await bookingsRef.child(key).remove();
+          alert('Törölve.');
+          return;
+        }
+      }
+      alert('Nem található a foglalás törlésre.');
     });
+    tdAction.appendChild(delBtn);
+    tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
+    adminTbody.appendChild(tr);
+  });
 }
 
-// Ülések újraszámolása: minden dátumra újra kiosztjuk az ülésindexeket sorban, FIFO
-document.getElementById("reassignBtn").addEventListener("click", ()=>{
-  if(!confirm("Újraszámolod az üléseket minden foglalásnál (date szerint FIFO). Folytatod?")) return;
-  // csoportosítjuk dátum szerint
-  bookings.sort((a,b)=> a.date === b.date ? a.createdAt - b.createdAt : (a.date > b.date ? 1 : -1));
-  const grouped = {};
-  bookings.forEach(b => {
-    if(!grouped[b.date]) grouped[b.date]=[];
-    grouped[b.date].push(b);
-  });
-  // új kiosztás
-  for(const date in grouped){
-    const list = grouped[date];
-    const seatPool = [0,1,2,3];
-    // reset assigned
-    list.forEach(b=>{
-      b.seatsAssigned = [];
-    });
-    // sequential assign
-    list.forEach(b=>{
-      const need = b.seats || 1;
-      // take first N from pool
-      if(seatPool.length < need){
-        // ha kevés, azok a foglalások maradnak üresen (vagy igény szerint kezelhető)
-        b.seatsAssigned = b.seatsAssigned.concat(seatPool.splice(0));
-      } else {
-        b.seatsAssigned = b.seatsAssigned.concat(seatPool.splice(0,need));
-      }
-    });
+// reassign seats: FIFO per date
+document.getElementById('reassignBtn').addEventListener('click', async ()=>{
+  if(!confirm('Újraszámolod az üléseket minden foglalásnál. Folytatod?')) return;
+  // fetch snapshot
+  const snap = await bookingsRef.once('value');
+  const obj = snap.val() || {};
+  // group by date
+  const map = {};
+  for(const key in obj){
+    const b = obj[key];
+    if(!map[b.date]) map[b.date] = [];
+    map[b.date].push({key, data:b});
   }
-  save();
-  renderAdminTable();
-  alert("Ülések újraszámolva.");
+  // for each date, reassign seats 1..4 FIFO
+  for(const date in map){
+    const pool = [1,2,3,4];
+    const list = map[date].sort((a,b)=> a.data.createdAt - b.data.createdAt);
+    for(const item of list){
+      const need = item.data.seats || 1;
+      const assigned = pool.splice(0, need);
+      item.data.seatsAssigned = assigned;
+      // write back
+      await bookingsRef.child(item.key).set(item.data);
+    }
+  }
+  alert('Ülések újraszámolva.');
 });
 
-// töröl mindent
-document.getElementById("deleteAllBtn").addEventListener("click", ()=>{
-  if(!confirm("Valóban törlöd az összes foglalást?")) return;
-  bookings = [];
-  save();
-  renderAdminTable();
-  alert("Összes foglalás törölve.");
+// delete all
+document.getElementById('deleteAllBtn').addEventListener('click', async ()=>{
+  if(!confirm('Valóban törlöd az összes foglalást?')) return;
+  await bookingsRef.remove();
+  alert('Összes foglalás törölve.');
 });
 
-// exportálás JSON
-document.getElementById("exportBtn").addEventListener("click", ()=>{
-  const dataStr = JSON.stringify(bookings, null, 2);
-  const blob = new Blob([dataStr], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "bookings-export.json"; document.body.appendChild(a); a.click();
-  a.remove(); URL.revokeObjectURL(url);
+// export
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const dataStr = JSON.stringify(bookings || [], null, 2);
+  const blob = new Blob([dataStr], {type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'bookings-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
 
-// init table on load (ha be vagyunk jelentkezve, de most még nincs)
-renderAdminTable();
+// logout
+document.getElementById('logoutBtn').addEventListener('click', ()=>{ adminArea.style.display='none'; pwd.value=''; loginMsg.textContent=''; });
 </script>
 </body>
 </html>
