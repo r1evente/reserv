@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Autós Helyfoglalás</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:0}
+    .wrap{max-width:980px;margin:20px auto;padding:16px}
+    .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);margin-bottom:12px}
+    input,button,select{padding:10px;border-radius:8px;border:1px solid #ddd;font-size:1rem}
+    button{background:#4CAF50;color:#fff;border:none;cursor:pointer}
+    .danger{background:#e74c3c}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:10px;border-bottom:1px solid #eee;text-align:center}
+    .muted{color:#666;font-size:.95rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2>Admin belépés</h2>
+      <div class="muted">Adj meg egy egyszerű jelszót a belépéshez (alap: <strong>admin</strong>)</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <input id="pwd" type="password" placeholder="Jelszó" />
+        <button id="loginBtn">Belépés</button>
+      </div>
+      <div id="loginMsg" class="muted" style="margin-top:8px"></div>
+    </div>
+
+    <div id="adminArea" style="display:none">
+      <div class="card">
+        <h2>Admin kezelőfelület</h2>
+        <div class="muted">Itt törölhetsz foglalásokat, újraszámolhatod az üléseket vagy törölhetsz mindent.</div>
+
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button id="reassignBtn">Ülések újraszámolása</button>
+          <button id="deleteAllBtn" class="danger">Összes foglalás törlése</button>
+          <button id="exportBtn">Exportálás (JSON)</button>
+          <button id="logoutBtn" style="margin-left:auto">Kijelentkezés</button>
+        </div>
+
+        <div style="margin-top:12px" class="muted">
+          Megjegyzés: a rendszer a következő Péntek/Vasárnap dátumokra tárolja a foglalásokat.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Foglalások (minden)</h3>
+        <div class="muted">Kattints a törlés ikonra egy foglalás eltávolításához.</div>
+        <table id="adminTable">
+          <thead>
+            <tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ülések</th><th>Művelet</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:18px" class="muted">Vissza a felhasználói oldalra: <a href="index.html">index.html</a></div>
+  </div>
+
+<script>
+const STORAGE_KEY = "bookings";
+let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+const ADMIN_PWD = "admin";
+
+const loginBtn = document.getElementById("loginBtn");
+const pwd = document.getElementById("pwd");
+const loginMsg = document.getElementById("loginMsg");
+const adminArea = document.getElementById("adminArea");
+const adminTbody = document.querySelector("#adminTable tbody");
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); }
+
+// belépés
+loginBtn.addEventListener("click", ()=>{
+  if(pwd.value === ADMIN_PWD){
+    loginMsg.textContent = "Sikeres belépés.";
+    adminArea.style.display = "block";
+    document.querySelector(".card").scrollIntoView({behavior:"smooth"});
+    renderAdminTable();
+  } else {
+    loginMsg.textContent = "Hibás jelszó.";
+  }
+});
+
+// kijelentkezés
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  adminArea.style.display = "none";
+  pwd.value = "";
+  loginMsg.textContent = "";
+});
+
+// render admin tábla
+function renderAdminTable(){
+  bookings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  adminTbody.innerHTML = "";
+  if(bookings.length === 0){
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6; td.textContent = "Nincsenek foglalások."; td.style.color="#666";
+    tr.appendChild(td); adminTbody.appendChild(tr); return;
+  }
+  // rendezzük
+  bookings.slice().sort((a,b)=> a.date === b.date ? a.createdAt - b.createdAt : (a.date > b.date ? 1 : -1))
+    .forEach((b, idx)=>{
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td"); tdName.textContent = b.name;
+      const tdDay = document.createElement("td"); tdDay.textContent = (b.day==="friday"?"Péntek":"Vasárnap");
+      const tdDate = document.createElement("td"); tdDate.textContent = b.date;
+      const tdTime = document.createElement("td"); tdTime.textContent = b.time;
+      const tdSeats = document.createElement("td"); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
+        if(i===0) return "Sofőr";
+        if(i===1) return "Első utas";
+        if(i===2) return "Hátsó bal";
+        return "Hátsó jobb";
+      }).join(", ");
+      const tdAction = document.createElement("td");
+      const delBtn = document.createElement("button"); delBtn.textContent = "Törlés"; delBtn.style.background="#e74c3c"; delBtn.style.color="#fff"; delBtn.style.border="none"; delBtn.style.padding="6px 10px"; delBtn.style.borderRadius="6px"; delBtn.style.cursor="pointer";
+      delBtn.addEventListener("click", ()=>{
+        if(!confirm("Biztos törlöd a foglalást?")) return;
+        bookings = bookings.filter(x => x.id !== b.id);
+        save(); renderAdminTable(); alert("Törölve.");
+      });
+      tdAction.appendChild(delBtn);
+
+      tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
+      adminTbody.appendChild(tr);
+    });
+}
+
+// Ülések újraszámolása: minden dátumra újra kiosztjuk az ülésindexeket sorban, FIFO
+document.getElementById("reassignBtn").addEventListener("click", ()=>{
+  if(!confirm("Újraszámolod az üléseket minden foglalásnál (date szerint FIFO). Folytatod?")) return;
+  // csoportosítjuk dátum szerint
+  bookings.sort((a,b)=> a.date === b.date ? a.createdAt - b.createdAt : (a.date > b.date ? 1 : -1));
+  const grouped = {};
+  bookings.forEach(b => {
+    if(!grouped[b.date]) grouped[b.date]=[];
+    grouped[b.date].push(b);
+  });
+  // új kiosztás
+  for(const date in grouped){
+    const list = grouped[date];
+    const seatPool = [0,1,2,3];
+    // reset assigned
+    list.forEach(b=>{
+      b.seatsAssigned = [];
+    });
+    // sequential assign
+    list.forEach(b=>{
+      const need = b.seats || 1;
+      // take first N from pool
+      if(seatPool.length < need){
+        // ha kevés, azok a foglalások maradnak üresen (vagy igény szerint kezelhető)
+        b.seatsAssigned = b.seatsAssigned.concat(seatPool.splice(0));
+      } else {
+        b.seatsAssigned = b.seatsAssigned.concat(seatPool.splice(0,need));
+      }
+    });
+  }
+  save();
+  renderAdminTable();
+  alert("Ülések újraszámolva.");
+});
+
+// töröl mindent
+document.getElementById("deleteAllBtn").addEventListener("click", ()=>{
+  if(!confirm("Valóban törlöd az összes foglalást?")) return;
+  bookings = [];
+  save();
+  renderAdminTable();
+  alert("Összes foglalás törölve.");
+});
+
+// exportálás JSON
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  const dataStr = JSON.stringify(bookings, null, 2);
+  const blob = new Blob([dataStr], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "bookings-export.json"; document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+});
+
+// init table on load (ha be vagyunk jelentkezve, de most még nincs)
+renderAdminTable();
+</script>
+</body>
+</html>
