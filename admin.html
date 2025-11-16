@@ -64,7 +64,7 @@ const FIREBASE_CONFIG = {
 };
 /* ------------------------------------------------------------------------------ */
 
-firebase.initializeApp(FIREBASE_CONFIG);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const bookingsRef = db.ref('bookings');
 
