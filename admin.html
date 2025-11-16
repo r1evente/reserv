@@ -54,7 +54,7 @@
 <script>
 /* ----- CONFIG: cseréld ki ugyanazzal a FIREBASE_CONFIG objecttel, mint az index.html-ben ----- */
 const FIREBASE_CONFIG = {
- apiKey: "AIzaSyBpUMFd8bvIU8IPLmbbxznkH1rwVvEE2vM",
+  apiKey: "AIzaSyBpUMFd8bvIU8IPLmbbxznkH1rwVvEE2vM",
   authDomain: "reservations-7d03f.firebaseapp.com",
   databaseURL: "https://reservations-7d03f-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "reservations-7d03f",
@@ -64,124 +64,126 @@ const FIREBASE_CONFIG = {
   measurementId: "G-M7YJVQ1BHC"
 };
 /* ------------------------------------------------------------------------------ */
-
-firebase.initializeApp(FIREBASE_CONFIG);
-const db = firebase.database();
-const bookingsRef = db.ref('bookings');
-
-const ADMIN_PWD = '123'; // egyszerű jelszó (prototípushoz)
-
-// UI
-const loginBtn = document.getElementById('loginBtn');
-const pwd = document.getElementById('pwd');
-const loginMsg = document.getElementById('loginMsg');
-const adminArea = document.getElementById('adminArea');
-const adminTbody = document.querySelector('#adminTable tbody');
-
-let bookings = [];
-
-// listen realtime
-bookingsRef.on('value', snap=>{
-  const val = snap.val() || {};
-  bookings = Object.keys(val).map(k => val[k]);
-  renderAdminTable();
-});
-
-loginBtn.addEventListener('click', ()=>{
-  if(pwd.value === ADMIN_PWD){
-    loginMsg.textContent = 'Sikeres belépés';
-    adminArea.style.display = 'block';
-    pwd.value = '';
+document.addEventListener('DOMContentLoaded', () => {
+  
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.database();
+  const bookingsRef = db.ref('bookings');
+  
+  const ADMIN_PWD = '123'; // egyszerű jelszó (prototípushoz)
+  
+  // UI
+  const loginBtn = document.getElementById('loginBtn');
+  const pwd = document.getElementById('pwd');
+  const loginMsg = document.getElementById('loginMsg');
+  const adminArea = document.getElementById('adminArea');
+  const adminTbody = document.querySelector('#adminTable tbody');
+  
+  let bookings = [];
+  
+  // listen realtime
+  bookingsRef.on('value', snap=>{
+    const val = snap.val() || {};
+    bookings = Object.keys(val).map(k => val[k]);
     renderAdminTable();
-  } else loginMsg.textContent = 'Hibás jelszó';
-});
-
-// render admin table
-function renderAdminTable(){
-  adminTbody.innerHTML = '';
-  if(!bookings || bookings.length === 0){
-    const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan=6; td.textContent='Nincsenek foglalások.'; td.style.color='#666'; tr.appendChild(td); adminTbody.appendChild(tr); return;
-  }
-  bookings.slice().sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date > b.date ? 1 : -1)).forEach(b=>{
-    const tr = document.createElement('tr');
-    const tdName = document.createElement('td'); tdName.textContent = b.name;
-    const tdDay = document.createElement('td'); tdDay.textContent = (b.day==='friday'?'Péntek':'Vasárnap');
-    const tdDate = document.createElement('td'); tdDate.textContent = b.date;
-    const tdTime = document.createElement('td'); tdTime.textContent = b.time;
-    const tdSeats = document.createElement('td'); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
-      if(i===1) return 'Első utas';
-      if(i===2) return 'Hátsó bal';
-      if(i===3) return 'Hátsó közép';
-      if(i===4) return 'Hátsó jobb';
-      return '';
-    }).join(', ');
-    const tdAction = document.createElement('td');
-    const delBtn = document.createElement('button'); delBtn.textContent = 'Törlés'; delBtn.style.background='#e74c3c'; delBtn.style.color='#fff'; delBtn.style.border='none'; delBtn.style.padding='6px 10px'; delBtn.style.borderRadius='6px'; delBtn.style.cursor='pointer';
-    delBtn.addEventListener('click', async ()=>{
-      if(!confirm('Biztos törlöd a foglalást?')) return;
-      // delete in firebase by child id (bookings stored by push key maybe -> find key)
-      // to delete we must find the child whose value.id === b.id
-      const snapshot = await bookingsRef.once('value');
-      const obj = snapshot.val() || {};
-      for(const key in obj){
-        if(obj[key].id === b.id){
-          await bookingsRef.child(key).remove();
-          alert('Törölve.');
-          return;
-        }
-      }
-      alert('Nem található a foglalás törlésre.');
-    });
-    tdAction.appendChild(delBtn);
-    tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
-    adminTbody.appendChild(tr);
   });
-}
-
-// reassign seats: FIFO per date
-document.getElementById('reassignBtn').addEventListener('click', async ()=>{
-  if(!confirm('Újraszámolod az üléseket minden foglalásnál. Folytatod?')) return;
-  // fetch snapshot
-  const snap = await bookingsRef.once('value');
-  const obj = snap.val() || {};
-  // group by date
-  const map = {};
-  for(const key in obj){
-    const b = obj[key];
-    if(!map[b.date]) map[b.date] = [];
-    map[b.date].push({key, data:b});
-  }
-  // for each date, reassign seats 1..4 FIFO
-  for(const date in map){
-    const pool = [1,2,3,4];
-    const list = map[date].sort((a,b)=> a.data.createdAt - b.data.createdAt);
-    for(const item of list){
-      const need = item.data.seats || 1;
-      const assigned = pool.splice(0, need);
-      item.data.seatsAssigned = assigned;
-      // write back
-      await bookingsRef.child(item.key).set(item.data);
+  
+  loginBtn.addEventListener('click', ()=>{
+    if(pwd.value === ADMIN_PWD){
+      loginMsg.textContent = 'Sikeres belépés';
+      adminArea.style.display = 'block';
+      pwd.value = '';
+      renderAdminTable();
+    } else loginMsg.textContent = 'Hibás jelszó';
+  });
+  
+  // render admin table
+  function renderAdminTable(){
+    adminTbody.innerHTML = '';
+    if(!bookings || bookings.length === 0){
+      const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan=6; td.textContent='Nincsenek foglalások.'; td.style.color='#666'; tr.appendChild(td); adminTbody.appendChild(tr); return;
     }
+    bookings.slice().sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date > b.date ? 1 : -1)).forEach(b=>{
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td'); tdName.textContent = b.name;
+      const tdDay = document.createElement('td'); tdDay.textContent = (b.day==='friday'?'Péntek':'Vasárnap');
+      const tdDate = document.createElement('td'); tdDate.textContent = b.date;
+      const tdTime = document.createElement('td'); tdTime.textContent = b.time;
+      const tdSeats = document.createElement('td'); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
+        if(i===1) return 'Első utas';
+        if(i===2) return 'Hátsó bal';
+        if(i===3) return 'Hátsó közép';
+        if(i===4) return 'Hátsó jobb';
+        return '';
+      }).join(', ');
+      const tdAction = document.createElement('td');
+      const delBtn = document.createElement('button'); delBtn.textContent = 'Törlés'; delBtn.style.background='#e74c3c'; delBtn.style.color='#fff'; delBtn.style.border='none'; delBtn.style.padding='6px 10px'; delBtn.style.borderRadius='6px'; delBtn.style.cursor='pointer';
+      delBtn.addEventListener('click', async ()=>{
+        if(!confirm('Biztos törlöd a foglalást?')) return;
+        // delete in firebase by child id (bookings stored by push key maybe -> find key)
+        // to delete we must find the child whose value.id === b.id
+        const snapshot = await bookingsRef.once('value');
+        const obj = snapshot.val() || {};
+        for(const key in obj){
+          if(obj[key].id === b.id){
+            await bookingsRef.child(key).remove();
+            alert('Törölve.');
+            return;
+          }
+        }
+        alert('Nem található a foglalás törlésre.');
+      });
+      tdAction.appendChild(delBtn);
+      tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
+      adminTbody.appendChild(tr);
+    });
   }
-  alert('Ülések újraszámolva.');
-});
-
-// delete all
-document.getElementById('deleteAllBtn').addEventListener('click', async ()=>{
-  if(!confirm('Valóban törlöd az összes foglalást?')) return;
-  await bookingsRef.remove();
-  alert('Összes foglalás törölve.');
-});
-
-// export
-document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const dataStr = JSON.stringify(bookings || [], null, 2);
-  const blob = new Blob([dataStr], {type:'application/json'}); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'bookings-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-});
-
-// logout
-document.getElementById('logoutBtn').addEventListener('click', ()=>{ adminArea.style.display='none'; pwd.value=''; loginMsg.textContent=''; });
-</script>
-</body>
-</html>
+  
+  // reassign seats: FIFO per date
+  document.getElementById('reassignBtn').addEventListener('click', async ()=>{
+    if(!confirm('Újraszámolod az üléseket minden foglalásnál. Folytatod?')) return;
+    // fetch snapshot
+    const snap = await bookingsRef.once('value');
+    const obj = snap.val() || {};
+    // group by date
+    const map = {};
+    for(const key in obj){
+      const b = obj[key];
+      if(!map[b.date]) map[b.date] = [];
+      map[b.date].push({key, data:b});
+    }
+    // for each date, reassign seats 1..4 FIFO
+    for(const date in map){
+      const pool = [1,2,3,4];
+      const list = map[date].sort((a,b)=> a.data.createdAt - b.data.createdAt);
+      for(const item of list){
+        const need = item.data.seats || 1;
+        const assigned = pool.splice(0, need);
+        item.data.seatsAssigned = assigned;
+        // write back
+        await bookingsRef.child(item.key).set(item.data);
+      }
+    }
+    alert('Ülések újraszámolva.');
+  });
+  
+  // delete all
+  document.getElementById('deleteAllBtn').addEventListener('click', async ()=>{
+    if(!confirm('Valóban törlöd az összes foglalást?')) return;
+    await bookingsRef.remove();
+    alert('Összes foglalás törölve.');
+  });
+  
+  // export
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    const dataStr = JSON.stringify(bookings || [], null, 2);
+    const blob = new Blob([dataStr], {type:'application/json'}); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'bookings-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+  
+  // logout
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{ adminArea.style.display='none'; pwd.value=''; loginMsg.textContent=''; });
+  }
+  </script>
+  </body>
+  </html>
