@@ -13,84 +13,46 @@
       --bg:#f4f6f8;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Arial,sans-serif;
-      background:var(--bg);
-      color:#222;
-      -webkit-font-smoothing:antialiased;
-    }
-    header{
-      background:#222;
-      color:white;
-      padding:16px;
-      text-align:center;
-    }
-    main{padding:16px; max-width:980px; margin:0 auto;}
-    h1,h2{margin:8px 0;}
-    .top-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
-    .card{
-      background:var(--card);
-      border-radius:10px;
-      padding:12px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.06);
-    }
-
-    /* free seats box */
-    .free-box{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .free-item{min-width:150px;padding:10px;border-radius:8px;text-align:center;}
-    .big {font-weight:700;font-size:1.05rem}
-    .muted{color:var(--muted);font-size:0.95rem}
-
-    /* form */
-    form{display:grid;gap:8px;}
-    label{font-size:0.95rem}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#222}
+    header{background:#222;color:white;padding:14px;text-align:center}
+    main{padding:14px;max-width:980px;margin:0 auto}
+    .card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:12px}
+    .top-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+    .free-box{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .free-item{min-width:140px;padding:10px;border-radius:8px;text-align:center}
+    .big{font-weight:700;font-size:1.05rem}
+    form{display:grid;gap:8px}
     input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:1rem}
     button{background:var(--accent);color:white;border:none;cursor:pointer}
-    button:active{transform:translateY(1px)}
-
-    /* table */
+    .car-area{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+    .car-visual{flex:1;min-width:260px}
+    .seatRect{transition:all .12s}
+    .seat.free{fill:#e6fff0;stroke:#4CAF50}
+    .seat.taken{fill:#ffecec;stroke:#e74c3c'}
+    .seat.selected{fill:#cfefff;stroke:#1e88e5}
+    .muted{color:var(--muted)}
+    .seat-pill{padding:8px;border-radius:8px;background:#fafafa;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
     .table-wrap{overflow:auto;border-radius:8px}
     table{width:100%;border-collapse:collapse;min-width:600px}
     th,td{padding:10px;text-align:center;border-bottom:1px solid #eee}
     th{background:#fafafa;font-weight:600}
-
-    /* car svg layout */
-    .car-area{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
-    .car-visual{flex:1;min-width:260px}
-    .legend{min-width:200px}
-    .seat {
-      cursor:default;
-      transition:transform .12s;
-    }
-    .seat.free{fill:#e6fff0;stroke:#4CAF50}
-    .seat.taken{fill:#ffecec;stroke:#e74c3c}
-    .seat-label{font-size:0.9rem;fill:#222}
-
-    /* seat list small */
-    .seat-list{display:flex;flex-direction:column;gap:8px}
-    .seat-pill{padding:8px;border-radius:8px;background:#fafafa;display:flex;justify-content:space-between;align-items:center}
-    .seat-pill .name{font-weight:600}
-    .seat-pill.small{font-size:0.95rem}
-
-    /* responsive */
     @media (max-width:700px){
       .top-row{flex-direction:column}
       .car-area{flex-direction:column}
       table{min-width:100%}
-      .legend{width:100%}
     }
-    footer{padding:8px;text-align:center;color:#666;font-size:0.9rem;margin-top:40px}
+    footer{padding:8px;text-align:center;color:#666;font-size:0.9rem;margin-top:30px}
   </style>
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Autós Helyfoglalás — Péntek és Vasárnap</h1>
-  </header>
+  <header><h1>Autós Helyfoglalás — Péntek és Vasárnap</h1></header>
 
   <main>
     <section class="top-row">
-      <div class="card free-box" style="flex:1;">
+      <div class="card free-box" style="flex:1">
         <div class="free-item">
           <div class="muted">Péntek</div>
           <div id="fridaySeats" class="big">—</div>
@@ -108,16 +70,11 @@
         <form id="bookingForm" class="card">
           <label for="name">Neved</label>
           <input id="name" type="text" placeholder="Pl. János" required />
-
           <label for="day">Nap</label>
-          <select id="day" required>
-            <option value="friday">Péntek</option>
-            <option value="sunday">Vasárnap</option>
-          </select>
-
-          <label for="seats">Hány helyet?</label>
-          <input id="seats" type="number" min="1" max="4" value="1" required />
-
+          <select id="day" required><option value="friday">Péntek</option><option value="sunday">Vasárnap</option></select>
+          <label for="seatsCount">Hány helyet szeretnél?</label>
+          <input id="seatsCount" type="number" min="1" max="4" value="1" required />
+          <div class="muted" style="font-size:0.9rem">Kattints az ülésre a grafikonon, hogy kiválaszd (opcionális). Ha nem választasz, automatikusan kiosztjuk.</div>
           <button type="submit">Foglalás</button>
         </form>
       </div>
@@ -127,289 +84,323 @@
       <div class="card car-visual">
         <h2 style="margin-top:0">Autó ülések (felülnézet)</h2>
 
-        <!-- day selector for visualization -->
-        <div style="margin-bottom:10px">
-          <label style="font-size:.95rem">Megtekintés nap:</label>
+        <div style="margin-bottom:8px">
+          <label class="muted">Megtekintés nap:</label>
           <select id="visualDay" style="padding:8px;border-radius:8px;margin-top:6px">
-            <option value="friday">Péntek</option>
-            <option value="sunday">Vasárnap</option>
+            <option value="friday">Péntek</option><option value="sunday">Vasárnap</option>
           </select>
         </div>
 
-        <!-- SVG car simple silhouette with 4 seats -->
-        <svg viewBox="0 0 400 220" width="100%" height="220" aria-hidden="false" role="img">
-          <!-- car body -->
-          <rect x="20" y="30" rx="18" ry="18" width="360" height="160" fill="#e9eef2" stroke="#c7d2d9"></rect>
+        <!-- SVG felülnézet; 5 ülés: 0 Sofőr (nem foglalható), 1 Első utas, 2 Hátsó bal, 3 Hátsó középső, 4 Hátsó jobb -->
+        <svg viewBox="0 0 480 260" width="100%" height="260" aria-hidden="false" role="img">
+          <rect x="20" y="20" rx="16" ry="16" width="440" height="220" fill="#e9eef2" stroke="#c7d2d9"></rect>
 
-          <!-- driver seat (0) -->
-          <g id="seat-0" class="seat-group" transform="translate(60,60)" data-seat="0">
-            <rect class="seatRect seat" x="0" y="0" width="70" height="50" rx="8" stroke="#4CAF50" fill="#e6fff0"></rect>
-            <text x="8" y="30" class="seat-label">Sofőr</text>
+          <!-- Sofőr (0) - not selectable -->
+          <g id="seat-0" transform="translate(60,40)" data-seat="0" aria-hidden="true">
+            <rect width="80" height="60" rx="8" class="seatRect" fill="#f7fff7" stroke="#9ccc65"></rect>
+            <text x="10" y="38" font-size="14" fill="#222">Sofőr (nem fogl.)</text>
           </g>
 
           <!-- front passenger (1) -->
-          <g id="seat-1" class="seat-group" transform="translate(160,60)" data-seat="1">
-            <rect class="seatRect seat" x="0" y="0" width="70" height="50" rx="8" stroke="#4CAF50" fill="#e6fff0"></rect>
-            <text x="8" y="30" class="seat-label">Első utas</text>
+          <g id="seat-1" transform="translate(220,40)" data-seat="1">
+            <rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
+            <text x="10" y="38" font-size="14" fill="#222">Első utas</text>
           </g>
 
           <!-- rear left (2) -->
-          <g id="seat-2" class="seat-group" transform="translate(60,120)" data-seat="2">
-            <rect class="seatRect seat" x="0" y="0" width="70" height="50" rx="8" stroke="#4CAF50" fill="#e6fff0"></rect>
-            <text x="8" y="30" class="seat-label">Hátsó bal</text>
+          <g id="seat-2" transform="translate(60,130)" data-seat="2">
+            <rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
+            <text x="10" y="38" font-size="14" fill="#222">Hátsó bal</text>
           </g>
 
-          <!-- rear right (3) -->
-          <g id="seat-3" class="seat-group" transform="translate(220,120)" data-seat="3">
-            <rect class="seatRect seat" x="0" y="0" width="70" height="50" rx="8" stroke="#4CAF50" fill="#e6fff0"></rect>
-            <text x="8" y="30" class="seat-label">Hátsó jobb</text>
+          <!-- rear middle (3) -->
+          <g id="seat-3" transform="translate(180,130)" data-seat="3">
+            <rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
+            <text x="10" y="38" font-size="14" fill="#222">Hátsó közép</text>
+          </g>
+
+          <!-- rear right (4) -->
+          <g id="seat-4" transform="translate(300,130)" data-seat="4">
+            <rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
+            <text x="10" y="38" font-size="14" fill="#222">Hátsó jobb</text>
           </g>
         </svg>
 
-        <div style="margin-top:12px" class="muted">
-          Zöld = szabad, piros = foglalt. A foglalások a következő <strong>péntek/vasárnap</strong> dátumára vonatkoznak (megadva fent).
-        </div>
+        <div style="margin-top:10px" class="muted">Zöld = szabad, piros = foglalt, kék = kiválasztott (a foglalásnál). Sofőr ülés nem foglalható.</div>
       </div>
 
-      <div class="card legend" style="flex:0.8;min-width:240px;">
-        <h3 style="margin-top:0">Foglalások listája (választott nap)</h3>
-        <div id="seatList" class="seat-list"></div>
+      <div class="card legend" style="flex:0.8;min-width:220px">
+        <h3 style="margin-top:0">Foglalások (választott nap)</h3>
+        <div id="seatList"></div>
       </div>
     </section>
 
-    <section style="margin-top:18px" class="card">
+    <section class="card">
       <h2 style="margin-top:0">Összes foglalás</h2>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Név</th>
-              <th>Nap</th>
-              <th>Dátum</th>
-              <th>Időpont</th>
-              <th>Hely(ek)</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ül.</th></tr></thead>
           <tbody id="bookingTableBody"></tbody>
         </table>
       </div>
-      <div style="margin-top:10px" class="muted">
-        Admin oldal: <a href="admin.html">admin.html</a> (jelszó: <strong>admin</strong>)
-      </div>
+      <div style="margin-top:10px" class="muted">Admin oldal: <a href="admin.html">admin.html</a> (jelszó: <strong>admin</strong>)</div>
     </section>
+
   </main>
 
-  <footer>
-    &copy; 2025 Autós Helyfoglalás
-  </footer>
+  <footer>&copy; 2025 Autós Helyfoglalás</footer>
 
 <script>
-/* ---------- Adatmodell ----------
-  Minden foglalás objektum:
-  { id, name, day("friday"|"sunday"), date:"YYYY-MM-DD", time:"HH:MM:SS", seats:number, seatsAssigned:[0,1], createdAt }
-  seatsAssigned: a konkrét ülésindex(ek) 0..3 (sofőr,első,hátsó bal,hátsó jobb)
-------------------------------------*/
+/* ----- CONFIG: cseréld ki a következő objectet a saját Firebase projekteddel ----- */
+const FIREBASE_CONFIG = {
+   apiKey: "AIzaSyBpUMFd8bvIU8IPLmbbxznkH1rwVvEE2vM",
+  authDomain: "reservations-7d03f.firebaseapp.com",
+  databaseURL: "https://reservations-7d03f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "reservations-7d03f",
+  storageBucket: "reservations-7d03f.firebasestorage.app",
+  messagingSenderId: "543288569908",
+  appId: "1:543288569908:web:db904e1f6c013246deda61",
+  measurementId: "G-M7YJVQ1BHC"
+};
+/* ------------------------------------------------------------------------------ */
 
-const MAX_SEATS = 4;
-const STORAGE_KEY = "bookings";
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
 
-// init
-let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+// konstansok
+const STORAGE_KEY = 'bookings_local_cache';
+const MAX_SEATS = 4; // foglalható ülések száma (1 elöl + 3 hátul) — sofőr (0) nem foglalható
+// seat indexek: 0 sofőr (nem foglalható), 1..4 foglalható
 
-// helper: következő péntek/vasárnap dátája
+// UI elemek
+const bookingForm = document.getElementById('bookingForm');
+const seatsCountInput = document.getElementById('seatsCount');
+const visualDay = document.getElementById('visualDay');
+const seatList = document.getElementById('seatList');
+const bookingTableBody = document.getElementById('bookingTableBody');
+const fridaySeatsEl = document.getElementById('fridaySeats');
+const sundaySeatsEl = document.getElementById('sundaySeats');
+const fridayDateEl = document.getElementById('fridayDate');
+const sundayDateEl = document.getElementById('sundayDate');
+
+let selectedSeats = []; // ideiglenes felhasználói seat kiválasztás (indexek)
+let bookings = []; // helyi cache
+
+// Firebase reference
+const bookingsRef = db.ref('bookings');
+
+// Segédfüggvény: következő péntek/vasárnap
 function getNextDate(dayName){
   const today = new Date();
-  const day = today.getDay(); // 0 vas, 1 hétfő ... 5 péntek
-  const target = dayName === "friday" ? 5 : 0;
+  const day = today.getDay();
+  const target = dayName === 'friday' ? 5 : 0;
   let diff = target - day;
-  if (diff <= 0) diff += 7;
+  if(diff <= 0) diff += 7;
   const d = new Date();
-  d.setDate(today.getDate()+diff);
-  return d.toISOString().split("T")[0];
+  d.setDate(today.getDate() + diff);
+  return d.toISOString().split('T')[0];
 }
 
-// törölje a lejárt foglalásokat (date < today)
-function removeExpiredBookings(){
-  const today = new Date().toISOString().split("T")[0];
+// töröld a lejárt foglalásokat (client-side)
+function removeExpiredLocal(){
+  const today = new Date().toISOString().split('T')[0];
   bookings = bookings.filter(b => b.date >= today);
-  save();
 }
 
-// mentsd a storage-ba
-function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); }
-
-// seat assignment: visszaad egy tömböt a lefoglalt ülésindexekről
-function assignSeatsForNewBooking(day,date,seatsRequested){
-  // gyűjtsd össze, mely indexek foglaltak erre a date-re
-  const taken = bookings
-    .filter(b => b.date === date)
-    .flatMap(b => b.seatsAssigned || []);
-  const free = [];
-  for(let i=0;i<MAX_SEATS;i++) if(!taken.includes(i)) free.push(i);
-  // ha nincs elég, visszaad null-t
-  if (free.length < seatsRequested) return null;
-  // egyszerű: vedd az első N szabad helyet
-  return free.slice(0,seatsRequested);
+// seat assignment: available seat indexes for date (exclude 0)
+function getTakenSeatIndexesForDate(date){
+  return bookings.filter(b=>b.date===date).flatMap(b=>b.seatsAssigned || []);
+}
+function getFreeSeatIndexesForDate(date){
+  const taken = getTakenSeatIndexesForDate(date);
+  // domain: seats 1..4 are bookable
+  const pool = [1,2,3,4];
+  return pool.filter(i => !taken.includes(i));
 }
 
-// frissítési funkciók
-function calcFreeSeatsForDate(date){
-  const used = bookings
-    .filter(b => b.date === date)
-    .reduce((s,b)=> s + (b.seats || 0), 0);
-  return Math.max(0, MAX_SEATS - used);
-}
-
-// render: header dátumok és szabad helyek
+// render header boxes
 function renderHeaderBoxes(){
-  const fDate = getNextDate("friday");
-  const sDate = getNextDate("sunday");
-  document.getElementById("fridayDate").textContent = fDate;
-  document.getElementById("sundayDate").textContent = sDate;
-  document.getElementById("fridaySeats").textContent = calcFreeSeatsForDate(fDate) + " szabad hely";
-  document.getElementById("sundaySeats").textContent = calcFreeSeatsForDate(sDate) + " szabad hely";
+  const fDate = getNextDate('friday'), sDate = getNextDate('sunday');
+  fridayDateEl.textContent = fDate; sundayDateEl.textContent = sDate;
+  fridaySeatsEl.textContent = getFreeSeatIndexesForDate(fDate).length + ' szabad hely';
+  sundaySeatsEl.textContent = getFreeSeatIndexesForDate(sDate).length + ' szabad hely';
 }
 
-// render: car seats (visualDay)
+// render car visual (colors + click handlers)
 function renderCarVisual(){
-  const day = document.getElementById("visualDay").value;
-  const date = day === "friday" ? getNextDate("friday") : getNextDate("sunday");
-  // seat elements
-  for(let i=0;i<4;i++){
-    const seatRect = document.querySelector(`#seat-${i} .seatRect`) || document.querySelector(`#seat-${i} rect`);
-    // default free
-    seatRect.classList.remove("taken");
-    seatRect.classList.add("free");
-    seatRect.setAttribute("fill","#e6fff0");
-    seatRect.setAttribute("stroke","#4CAF50");
-  }
-  // foglalt seat-ek
-  const takenSeats = bookings
-    .filter(b => b.date === date)
-    .flatMap(b => b.seatsAssigned || []);
-  takenSeats.forEach(si => {
-    const seatRect = document.querySelector(`#seat-${si} .seatRect`) || document.querySelector(`#seat-${si} rect`);
-    if(seatRect){
-      seatRect.classList.remove("free"); seatRect.classList.add("taken");
-      seatRect.setAttribute("fill","#ffecec");
-      seatRect.setAttribute("stroke","#e74c3c");
+  const day = visualDay.value; const date = day==='friday' ? getNextDate('friday') : getNextDate('sunday');
+  // reset all seat rects
+  for(let i=0;i<=4;i++){
+    const rect = document.querySelector(`#seat-${i} .seatRect`) || document.querySelector(`#seat-${i} rect`);
+    if(!rect) continue;
+    rect.classList.remove('taken','free','selected');
+    if(i===0){
+      rect.setAttribute('fill','#f7fff7'); rect.setAttribute('stroke','#9ccc65');
+      rect.style.cursor = 'not-allowed';
+      continue;
     }
-  });
-
-  // lista frissítése
+    // free or taken?
+    const taken = getTakenSeatIndexesForDate(date);
+    if(taken.includes(i)){
+      rect.classList.add('taken');
+      rect.setAttribute('fill','#ffecec'); rect.setAttribute('stroke','#e74c3c');
+      rect.style.cursor = 'default';
+    } else {
+      // if user selected it locally (before submit)
+      if(selectedSeats.includes(i) && date === (document.getElementById('day').value === 'friday' ? getNextDate('friday') : getNextDate('sunday'))){
+        rect.classList.add('selected');
+        rect.setAttribute('fill','#cfefff'); rect.setAttribute('stroke','#1e88e5');
+      } else {
+        rect.classList.add('free'); rect.setAttribute('fill','#e6fff0'); rect.setAttribute('stroke','#4CAF50');
+      }
+      rect.style.cursor = 'pointer';
+    }
+  }
   renderSeatListForDate(date);
 }
 
-// render seat list (right side)
+// seat list for side panel
 function renderSeatListForDate(date){
-  const container = document.getElementById("seatList");
-  container.innerHTML = "";
-  const dayBookings = bookings.filter(b => b.date === date).sort((a,b)=> a.createdAt - b.createdAt);
-
+  seatList.innerHTML = '';
+  const dayBookings = bookings.filter(b=>b.date===date).sort((a,b)=>a.createdAt-b.createdAt);
   if(dayBookings.length === 0){
-    const div = document.createElement("div"); div.className="muted"; div.textContent="Nincsenek foglalások erre a napra."; container.appendChild(div);
-    return;
+    seatList.innerHTML = '<div class="muted">Nincsenek foglalások erre a napra.</div>'; return;
   }
-
-  // megjelenítjük seat-by-seat: seat index -> name (ha van)
-  const seatMap = {}; // seatIndex -> booking
-  dayBookings.forEach(b => {
-    (b.seatsAssigned || []).forEach(idx => seatMap[idx] = b);
+  // build seat map
+  const seatMap = {};
+  dayBookings.forEach(b=>{
+    (b.seatsAssigned || []).forEach(si=>seatMap[si] = b);
   });
-
-  for(let i=0;i<MAX_SEATS;i++){
-    const pill = document.createElement("div"); pill.className="seat-pill small";
-    const left = document.createElement("div"); left.className="name";
-    const right = document.createElement("div"); right.className="muted";
-    let label="";
-    if(i===0) label="Sofőr";
-    else if(i===1) label="Első utas";
-    else if(i===2) label="Hátsó bal";
-    else label="Hátsó jobb";
-    left.textContent = label;
-    if(seatMap[i]){
-      right.textContent = seatMap[i].name;
-    } else {
-      right.textContent = "szabad";
-    }
-    pill.appendChild(left); pill.appendChild(right);
-    container.appendChild(pill);
+  const labels = {0:'Sofőr',1:'Első utas',2:'Hátsó bal',3:'Hátsó közép',4:'Hátsó jobb'};
+  for(let i=1;i<=4;i++){
+    const div = document.createElement('div'); div.className='seat-pill';
+    const left = document.createElement('div'); left.textContent = labels[i];
+    const right = document.createElement('div'); right.className='muted';
+    right.textContent = seatMap[i] ? seatMap[i].name : 'szabad';
+    div.appendChild(left); div.appendChild(right); seatList.appendChild(div);
   }
 }
 
-// render bookings table
+// bookings table
 function renderBookingsTable(){
-  const tbody = document.getElementById("bookingTableBody");
-  tbody.innerHTML = "";
-  // rendezzük dátum, day, majd idő alapján
-  const sorted = bookings.slice().sort((a,b) => {
-    if(a.date !== b.date) return a.date > b.date ? 1 : -1;
-    return a.createdAt - b.createdAt;
-  });
-  sorted.forEach(b => {
-    const tr = document.createElement("tr");
-    const tdName = document.createElement("td"); tdName.textContent = b.name;
-    const tdDay = document.createElement("td"); tdDay.textContent = (b.day==="friday"?"Péntek":"Vasárnap");
-    const tdDate = document.createElement("td"); tdDate.textContent = b.date;
-    const tdTime = document.createElement("td"); tdTime.textContent = b.time;
-    const tdSeats = document.createElement("td");
+  bookingTableBody.innerHTML = '';
+  const sorted = bookings.slice().sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : (a.date > b.date ? 1 : -1));
+  sorted.forEach(b=>{
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td'); tdName.textContent = b.name;
+    const tdDay = document.createElement('td'); tdDay.textContent = (b.day==='friday'?'Péntek':'Vasárnap');
+    const tdDate = document.createElement('td'); tdDate.textContent = b.date;
+    const tdTime = document.createElement('td'); tdTime.textContent = b.time;
+    const tdSeats = document.createElement('td');
     tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
-      if(i===0) return "Sofőr";
-      if(i===1) return "Első utas";
-      if(i===2) return "Hátsó bal";
-      return "Hátsó jobb";
-    }).join(", ");
+      if(i===1) return 'Első utas';
+      if(i===2) return 'Hátsó bal';
+      if(i===3) return 'Hátsó közép';
+      if(i===4) return 'Hátsó jobb';
+      return '';
+    }).join(', ');
     tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats);
-    tbody.appendChild(tr);
+    bookingTableBody.appendChild(tr);
   });
 }
 
-// új foglalás létrehozása
-document.getElementById("bookingForm").addEventListener("submit", e=>{
-  e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const day = document.getElementById("day").value;
-  const seatsRequested = parseInt(document.getElementById("seats").value,10) || 1;
-  const date = day === "friday" ? getNextDate("friday") : getNextDate("sunday");
-  // ellenőrzés: elég hely van-e
-  const free = calcFreeSeatsForDate(date);
-  if(seatsRequested > free){
-    alert("Nincs elég szabad hely erre a napra.");
-    return;
-  }
-  const seatsAssigned = assignSeatsForNewBooking(day,date,seatsRequested);
-  if(!seatsAssigned){
-    alert("Hiba: nem sikerült üléseket rendelni.");
-    return;
-  }
-  const time = new Date().toLocaleTimeString("hu-HU");
-  const obj = {
-    id: Date.now() + "-" + Math.floor(Math.random()*1000),
-    name, day, seats: seatsRequested, seatsAssigned, date,
-    time, createdAt: Date.now()
-  };
-  bookings.push(obj);
-  save();
-  renderAll();
-  e.target.reset();
+// helper: auto-assign seats if user didn't select specific seats
+function assignSeatsAuto(date, seatsRequested){
+  const free = getFreeSeatIndexesForDate(date);
+  if(free.length < seatsRequested) return null;
+  return free.slice(0,seatsRequested);
+}
+
+// listen to Firebase changes (realtime)
+bookingsRef.on('value', snapshot=>{
+  const val = snapshot.val() || {};
+  // firebase stores object map; convert to array
+  const arr = Object.keys(val).map(k => val[k]);
+  bookings = arr;
+  // cleanup expired
+  const today = new Date().toISOString().split('T')[0];
+  bookings = bookings.filter(b => b.date >= today);
+  renderHeaderBoxes(); renderCarVisual(); renderBookingsTable();
 });
 
-// admin lehet: az admin.html fogja kezelni a törlést, de itt is eltávolítjuk a lejártakat és frissítünk
-function renderAll(){
-  removeExpiredBookings();
-  renderHeaderBoxes();
-  renderCarVisual();
-  renderBookingsTable();
+// handle seat clicks (select/deselect) - note: disable 0 (driver)
+for(let i=1;i<=4;i++){
+  const g = document.getElementById('seat-'+i);
+  g && g.addEventListener('click', () => {
+    const day = document.getElementById('day').value;
+    const date = day==='friday' ? getNextDate('friday') : getNextDate('sunday');
+    // can't select if already taken
+    const taken = getTakenSeatIndexesForDate(date);
+    if(taken.includes(i)){ alert('Ez az ülés már foglalt erre a napra.'); return; }
+    // toggle
+    if(selectedSeats.includes(i)) selectedSeats = selectedSeats.filter(x=>x!==i);
+    else selectedSeats.push(i);
+    // limit by seatsCount
+    const requested = parseInt(seatsCountInput.value,10) || 1;
+    if(selectedSeats.length > requested) selectedSeats = selectedSeats.slice(0,requested);
+    renderCarVisual();
+  });
 }
 
-// amikor változik a vizuális nap select
-document.getElementById("visualDay").addEventListener("change", renderCarVisual);
+// form submit
+bookingForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const day = document.getElementById('day').value;
+  const seatsRequested = parseInt(document.getElementById('seatsCount').value,10) || 1;
+  const date = day==='friday' ? getNextDate('friday') : getNextDate('sunday');
 
-// init
-renderAll();
+  // check free seats
+  const free = getFreeSeatIndexesForDate(date);
+  if(free.length < seatsRequested){
+    alert('Nincs elég szabad hely erre a napra.');
+    return;
+  }
 
-// automatikus éjfél utáni frissítés: egyszerű megoldás, ha újratöltöd az oldalt frissül
-// (később lehet napi cron is)
+  // determine seatsAssigned: if user selected some -> use them (and autofill remaining), else auto assign.
+  let seatsAssigned = [];
+  if(selectedSeats.length > 0) {
+    // ensure validity and not exceeding requested
+    seatsAssigned = selectedSeats.slice(0,seatsRequested).filter(i => free.includes(i));
+    // if still less than requested, fill automatically
+    if(seatsAssigned.length < seatsRequested) {
+      const remaining = seatsRequested - seatsAssigned.length;
+      const freeNow = free.filter(i => !seatsAssigned.includes(i));
+      seatsAssigned = seatsAssigned.concat(freeNow.slice(0,remaining));
+    }
+  } else {
+    seatsAssigned = assignSeatsAuto(date,seatsRequested);
+  }
+  if(!seatsAssigned || seatsAssigned.length < seatsRequested){
+    alert('Hiba: nem sikerült ülés kiosztani.');
+    return;
+  }
+
+  const time = new Date().toLocaleTimeString('hu-HU');
+  const newObj = {
+    id: Date.now() + '-' + Math.floor(Math.random()*100000),
+    name, day, date, time, seats: seatsRequested, seatsAssigned, createdAt: Date.now()
+  };
+
+  // push to firebase (key autogenerated)
+  const newRef = bookingsRef.push();
+  await newRef.set(newObj);
+
+  // reset UI
+  bookingForm.reset();
+  selectedSeats = [];
+  // render will be triggered by database listener
+  alert('Foglalás sikeres!');
+});
+
+// visualDay change updates graphic
+visualDay.addEventListener('change', renderCarVisual);
+document.getElementById('day').addEventListener('change', ()=>{ selectedSeats = []; renderCarVisual(); });
+
+// initial render (header; actual seat states will load from Firebase listener)
+renderHeaderBoxes();
+renderCarVisual();
+renderBookingsTable();
 </script>
 </body>
 </html>
