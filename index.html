@@ -170,7 +170,7 @@
     appId: "1:543288569908:web:db904e1f6c013246deda61",
     measurementId: "G-M7YJVQ1BHC"
   };
-
+document.addEventListener('DOMContentLoaded', () => {
   // Initialize Firebase
   const app = initializeApp(FIREBASE_CONFIG);
   const analytics = getAnalytics(app);
@@ -411,9 +411,11 @@ document.getElementById('day').addEventListener('change', ()=>{ selectedSeats = 
 renderHeaderBoxes();
 renderCarVisual();
 renderBookingsTable();
+  });
 </script>
 </body>
 </html>
+
 
 
 
