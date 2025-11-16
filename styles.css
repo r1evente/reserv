@@ -1,38 +1,160 @@
+:root{
+  --accent:#4CAF50;
+  --danger:#e74c3c;
+  --muted:#777;
+  --card:#ffffff;
+  --bg:#f4f6f8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:var(--bg);
+  color:#222;
+  font-size: 1rem;
+}
+header{
+  background:#222;
+  color:white;
+  padding:14px;
+  text-align:center;
+}
+main{
+  padding:14px;
+  max-width:980px;
+  margin:0 auto;
+}
+.card{
+  background:var(--card);
+  border-radius:10px;
+  padding:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.06);
+  margin-bottom:12px;
+}
+.top-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.free-box{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.free-item{
+  min-width:140px;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+}
+.big{
+  font-weight:700;
+  font-size:1.05rem;
+}
+form{
+  display:grid;
+  gap:8px;
+}
+input,select,button{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:1rem;
+}
+button{
+  background:var(--accent);
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+.car-area{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.car-visual{
+  flex:1;
+  min-width:260px;
+}
+.seatRect{
+  transition:all .12s;
+}
+.seat.free{
+  fill:#e6fff0;
+  stroke:#4CAF50;
+}
+.seat.taken{
+  fill:#ffecec;
+  stroke:#e74c3c;
+}
+.seat.selected{
+  fill:#cfefff;
+  stroke:#1e88e5;
+}
+.muted{
+  color:var(--muted);
+}
+.seat-pill{
+  padding:8px;
+  border-radius:8px;
+  background:#fafafa;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
+}
+.table-wrap{
+  overflow:auto;
+  border-radius:8px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:600px;
+}
+th,td{
+  padding:10px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
+th{
+  background:#fafafa;
+  font-weight:600;
+}
+footer{
+  padding:8px;
+  text-align:center;
+  color:#666;
+  font-size:0.9rem;
+  margin-top:30px;
+}
 
-    :root{
-      --accent:#4CAF50;
-      --danger:#e74c3c;
-      --muted:#777;
-      --card:#ffffff;
-      --bg:#f4f6f8;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#222}
-    header{background:#222;color:white;padding:14px;text-align:center}
-    main{padding:14px;max-width:980px;margin:0 auto}
-    .card{background:var(--card);border-radius:10px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:12px}
-    .top-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
-    .free-box{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .free-item{min-width:140px;padding:10px;border-radius:8px;text-align:center}
-    .big{font-weight:700;font-size:1.05rem}
-    form{display:grid;gap:8px}
-    input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:1rem}
-    button{background:var(--accent);color:white;border:none;cursor:pointer}
-    .car-area{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
-    .car-visual{flex:1;min-width:260px}
-    .seatRect{transition:all .12s}
-    .seat.free{fill:#e6fff0;stroke:#4CAF50}
-    .seat.taken{fill:#ffecec;stroke:#e74c3c'}
-    .seat.selected{fill:#cfefff;stroke:#1e88e5}
-    .muted{color:var(--muted)}
-    .seat-pill{padding:8px;border-radius:8px;background:#fafafa;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-    .table-wrap{overflow:auto;border-radius:8px}
-    table{width:100%;border-collapse:collapse;min-width:600px}
-    th,td{padding:10px;text-align:center;border-bottom:1px solid #eee}
-    th{background:#fafafa;font-weight:600}
-    @media (max-width:700px){
-      .top-row{flex-direction:column}
-      .car-area{flex-direction:column}
-      table{min-width:100%}
-    }
-    footer{padding:8px;text-align:center;color:#666;font-size:0.9rem;margin-top:30px}
+/* Mobile optimization */
+@media (max-width:700px){
+  .top-row{
+    flex-direction: column;
+    gap: 8px;
+  }
+  .car-area{
+    flex-direction: column;
+    gap: 8px;
+  }
+  table{
+    min-width: 100%;
+    font-size: 0.9rem;
+  }
+  input, select, button{
+    font-size: 0.9rem;
+  }
+  main{
+    padding: 10px;
+    max-width: 100%;
+  }
+  .car-visual{
+    min-width: 100%;
+  }
+}
