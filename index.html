@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autós Helyfoglalás</title>
+  <style>
+    /* Alapstílusok */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #333;
+    }
+
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Autós Helyfoglalás - Péntek és Szombat</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>Foglalj helyet az autómban!</h2>
+      <form id="bookingForm">
+        <label for="name">Neved:</label>
+        <input type="text" id="name" required>
+
+        <label for="day">Válassz napot:</label>
+        <select id="day" required>
+          <option value="friday">Péntek</option>
+          <option value="saturday">Szombat</option>
+        </select>
+
+        <label for="seats">Hány helyet szeretnél foglalni?</label>
+        <input type="number" id="seats" min="1" max="4" required>
+
+        <button type="submit">Foglalás</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Foglalások</h2>
+      <ul id="bookingList">
+        <!-- Foglalások itt fognak megjelenni -->
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Autós Helyfoglalás</p>
+  </footer>
+
+  <script>
+    // script.js
+
+    const bookingList = document.getElementById('bookingList');
+    const bookingForm = document.getElementById('bookingForm');
+
+    let bookings = {
+      friday: [],
+      saturday: [],
+    };
+
+    bookingForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const day = document.getElementById('day').value;
+      const seats = parseInt(document.getElementById('seats').value);
+
+      if (seats <= 0 || seats > 4) {
+        alert('Maximálisan 4 helyet foglalhatsz.');
+        return;
+      }
+
+      const newBooking = { name, seats, day };
+      bookings[day].push(newBooking);
+      
+      // Foglalások frissítése a listán
+      updateBookingList(day);
+      
+      // űrlap tisztítása
+      bookingForm.reset();
+    });
+
+    // Foglalások megjelenítése
+    function updateBookingList(day) {
+      const dayBookings = bookings[day];
+      bookingList.innerHTML = '';
+      
+      dayBookings.forEach(booking => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${booking.name} - ${booking.seats} hely(${booking.day === 'friday' ? 'Péntek' : 'Szombat'})`;
+        bookingList.appendChild(listItem);
+      });
+    }
+  </script>
+</body>
+</html>
