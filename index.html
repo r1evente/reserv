@@ -17,14 +17,14 @@
     header{background:#222;color:white;padding:14px;text-align:center}
     main{padding:14px;max-width:980px;margin:0 auto}
     .card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:12px}
-    
-    /* Új és frissített CSS osztályok a beágyazott stílusok helyett */
-    .flex-grow { flex: 1; }
-    .form-card { min-width: 260px; max-width: 360px; }
-    .h2-compact { margin: 0 0 8px 0; }
-    .h2-no-margin { margin-top: 0; }
-    .info-text { font-size: 0.9rem; }
-    
+    
+    /* Új és frissített CSS osztályok a beágyazott stílusok helyett */
+    .flex-grow { flex: 1; }
+    .form-card { min-width: 260px; max-width: 360px; }
+    .h2-compact { margin: 0 0 8px 0; }
+    .h2-no-margin { margin-top: 0; }
+    .info-text { font-size: 0.9rem; }
+    
     .top-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
     .free-box{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .free-item{min-width:140px;padding:10px;border-radius:8px;text-align:center}
@@ -59,7 +59,7 @@
 
   <main>
     <section class="top-row">
-              <div class="card free-box flex-grow">
+      <div class="card free-box flex-grow">
         <div class="free-item">
           <div class="muted">Péntek</div>
           <div id="fridaySeats" class="big">—</div>
@@ -72,8 +72,8 @@
         </div>
       </div>
 
-              <div class="card form-card">
-                <h2 class="h2-compact">Foglalás</h2>
+      <div class="card form-card">
+        <h2 class="h2-compact">Foglalás</h2>
         <form id="bookingForm" class="card">
           <label for="name">Neved</label>
           <input id="name" type="text" placeholder="Pl. János" required />
@@ -81,7 +81,7 @@
           <select id="day" required><option value="friday">Péntek</option><option value="sunday">Vasárnap</option></select>
           <label for="seatsCount">Hány helyet szeretnél?</label>
           <input id="seatsCount" type="number" min="1" max="4" value="1" required />
-                      <div class="muted info-text">Kattints az ülésre a grafikonon, hogy kiválaszd (opcionális). Ha nem választasz, automatikusan kiosztjuk.</div>
+          <div class="muted info-text">Kattints az ülésre a grafikonon, hogy kiválaszd (opcionális). Ha nem választasz, automatikusan kiosztjuk.</div>
           <button type="submit">Foglalás</button>
         </form>
       </div>
@@ -89,7 +89,7 @@
 
     <section class="car-area">
       <div class="card car-visual">
-                <h2 class="h2-no-margin">Autó ülések (felülnézet)</h2>
+        <h2 class="h2-no-margin">Autó ülések (felülnézet)</h2>
 
         <div style="margin-bottom:8px">
           <label class="muted">Megtekintés nap:</label>
@@ -131,13 +131,13 @@
       </div>
 
       <div class="card legend" style="flex:0.8;min-width:220px">
-                <h3 class="h2-no-margin">Foglalások (választott nap)</h3>
+        <h3 class="h2-no-margin">Foglalások (választott nap)</h3>
         <div id="seatList"></div>
       </div>
     </section>
 
     <section class="card">
-              <h2 class="h2-no-margin">Összes foglalás</h2>
+      <h2 class="h2-no-margin">Összes foglalás</h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ül.</th></tr></thead>
@@ -152,9 +152,9 @@
   <footer>&copy; RL</footer>
 
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics-compat.js"></script>
 
 <script>
   // Your web app's Firebase configuration
@@ -172,15 +172,15 @@
 
 // JavaScript Optimalizálás: Globális konstansok a napokhoz és üléscímkékhez
 const DAYS = {
-    FRIDAY: 'friday',
-    SUNDAY: 'sunday',
+    FRIDAY: 'friday',
+    SUNDAY: 'sunday',
 };
 const SEAT_LABELS = {
-    1: 'Első utas',
-    2: 'Hátsó bal',
-    3: 'Hátsó közép',
-    4: 'Hátsó jobb',
-    0: 'Sofőr' // Bár nem foglalható, a legendához hasznos
+    1: 'Első utas',
+    2: 'Hátsó bal',
+    3: 'Hátsó közép',
+    4: 'Hátsó jobb',
+    0: 'Sofőr'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -192,9 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // konstansok
   const STORAGE_KEY = 'bookings_local_cache';
-  const MAX_SEATS = 4; // foglalható ülések száma (1 elöl + 3 hátul) — sofőr (0) nem foglalható
-  // seat indexek: 0 sofőr (nem foglalható), 1..4 foglalható
-
+  const MAX_SEATS = 4;
+  
   // UI elemek
   const bookingForm = document.getElementById('bookingForm');
   const seatsCountInput = document.getElementById('seatsCount');
@@ -206,9 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const fridayDateEl = document.getElementById('fridayDate');
   const sundayDateEl = document.getElementById('sundayDate');
 
-  let selectedSeats = []; // ideiglenes felhasználói seat kiválasztás (indexek)
-  let bookings = []; // helyi cache
-  // JavaScript Optimalizálás: Globális dátum cache
+  let selectedSeats = [];
+  let bookings = [];
   let nextFridayDate = '';
   let nextSundayDate = '';
 
@@ -240,14 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function getFreeSeatIndexesForDate(date){
     const taken = getTakenSeatIndexesForDate(date);
-    // domain: seats 1..4 are bookable
     const pool = [1,2,3,4];
     return pool.filter(i => !taken.includes(i));
   }
 
   // render header boxes
   function renderHeaderBoxes(){
-    // JavaScript Optimalizálás: Globális dátum változók használata
     const fDate = nextFridayDate;
     const sDate = nextSundayDate;
     fridayDateEl.textContent = fDate; sundayDateEl.textContent = sDate;
@@ -257,11 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // render car visual (colors + click handlers)
   function renderCarVisual(){
-    const day = visualDay.value; 
-    // JavaScript Optimalizálás: Globális dátum változók használata
+    const day = visualDay.value; 
     const date = day===DAYS.FRIDAY ? nextFridayDate : nextSundayDate;
 
-    // reset all seat rects
     for(let i=0;i<=4;i++){
       const rect = document.querySelector(`#seat-${i} .seatRect`) || document.querySelector(`#seat-${i} rect`);
       if(!rect) continue;
@@ -271,15 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         rect.style.cursor = 'not-allowed';
         continue;
       }
-      // free or taken?
       const taken = getTakenSeatIndexesForDate(date);
       if(taken.includes(i)){
         rect.classList.add('taken');
         rect.setAttribute('fill','#ffecec'); rect.setAttribute('stroke','#e74c3c');
         rect.style.cursor = 'default';
       } else {
-        // if user selected it locally (before submit)
-        // JavaScript Optimalizálás: Globális dátum változók használata
         if(selectedSeats.includes(i) && date === (document.getElementById('day').value === DAYS.FRIDAY ? nextFridayDate : nextSundayDate)){
           rect.classList.add('selected');
           rect.setAttribute('fill','#cfefff'); rect.setAttribute('stroke','#1e88e5');
@@ -299,12 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(dayBookings.length === 0){
       seatList.innerHTML = '<div class="muted">Nincsenek foglalások erre a napra.</div>'; return;
     }
-    // build seat map
     const seatMap = {};
     dayBookings.forEach(b=>{
       (b.seatsAssigned || []).forEach(si=>seatMap[si] = b);
     });
-    // JavaScript Optimalizálás: Konstans használata
+    
     for(let i=1;i<=4;i++){
       const div = document.createElement('div'); div.className='seat-pill';
       const left = document.createElement('div'); left.textContent = SEAT_LABELS[i];
@@ -325,9 +315,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const tdDate = document.createElement('td'); tdDate.textContent = b.date;
       const tdTime = document.createElement('td'); tdTime.textContent = b.time;
       const tdSeats = document.createElement('td');
-      // JavaScript Optimalizálás: Konstans használata az ülésnevekre
       tdSeats.textContent = (b.seatsAssigned || []).map(i => SEAT_LABELS[i] || '').join(', ');
-      
+      
       tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats);
       bookingTableBody.appendChild(tr);
     });
@@ -343,14 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // listen to Firebase changes (realtime)
   bookingsRef.on('value', snapshot=>{
     const val = snapshot.val() || {};
-    // firebase stores object map; convert to array
     const arr = Object.keys(val).map(k => val[k]);
     bookings = arr;
-    // cleanup expired
     const today = new Date().toISOString().split('T')[0];
     bookings = bookings.filter(b => b.date >= today);
 
-    // JavaScript Optimalizálás: Dátumok frissítése
     nextFridayDate = getNextDate(DAYS.FRIDAY);
     nextSundayDate = getNextDate(DAYS.SUNDAY);
 
@@ -362,16 +348,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const g = document.getElementById('seat-'+i);
     g && g.addEventListener('click', () => {
       const day = document.getElementById('day').value;
-      // JavaScript Optimalizálás: Globális dátum változók használata
       const date = day===DAYS.FRIDAY ? nextFridayDate : nextSundayDate;
-      
-      // can't select if already taken
+      
       const taken = getTakenSeatIndexesForDate(date);
       if(taken.includes(i)){ alert('Ez az ülés már foglalt erre a napra.'); return; }
-      // toggle
       if(selectedSeats.includes(i)) selectedSeats = selectedSeats.filter(x=>x!==i);
       else selectedSeats.push(i);
-      // limit by seatsCount
       const requested = parseInt(seatsCountInput.value,10) || 1;
       if(selectedSeats.length > requested) selectedSeats = selectedSeats.slice(0,requested);
       renderCarVisual();
@@ -384,22 +366,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const name = document.getElementById('name').value.trim();
     const day = document.getElementById('day').value;
     const seatsRequested = parseInt(document.getElementById('seatsCount').value,10) || 1;
-    // JavaScript Optimalizálás: Globális dátum változók használata
     const date = day===DAYS.FRIDAY ? nextFridayDate : nextSundayDate;
 
-    // check free seats
     const free = getFreeSeatIndexesForDate(date);
     if(free.length < seatsRequested){
       alert('Nincs elég szabad hely erre a napra.');
       return;
     }
 
-    // determine seatsAssigned: if user selected some -> use them (and autofill remaining), else auto assign.
     let seatsAssigned = [];
     if(selectedSeats.length > 0) {
-      // ensure validity and not exceeding requested
       seatsAssigned = selectedSeats.slice(0,seatsRequested).filter(i => free.includes(i));
-      // if still less than requested, fill automatically
       if(seatsAssigned.length < seatsRequested) {
         const remaining = seatsRequested - seatsAssigned.length;
         const freeNow = free.filter(i => !seatsAssigned.includes(i));
@@ -419,14 +396,11 @@ document.addEventListener('DOMContentLoaded', () => {
       name, day, date, time, seats: seatsRequested, seatsAssigned, createdAt: Date.now()
     };
 
-    // push to firebase (key autogenerated)
     const newRef = bookingsRef.push();
     await newRef.set(newObj);
 
-    // reset UI
     bookingForm.reset();
     selectedSeats = [];
-    // render will be triggered by database listener
     alert('Foglalás sikeres!');
   });
 
@@ -434,8 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
   visualDay.addEventListener('change', renderCarVisual);
   document.getElementById('day').addEventListener('change', ()=>{ selectedSeats = []; renderCarVisual(); });
 
-  // initial render (header; actual seat states will load from Firebase listener)
-  // JavaScript Optimalizálás: Dátumok első inicializálása
+  // initial render
   nextFridayDate = getNextDate(DAYS.FRIDAY);
   nextSundayDate = getNextDate(DAYS.SUNDAY);
 
