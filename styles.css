@@ -11,7 +11,9 @@ body{
   font-family:Inter,Arial,sans-serif;
   background:var(--bg);
   color:#222;
-  font-size: 1rem;
+  /* responsive base font size */
+  font-size: clamp(14px, 1.2vw, 16px);
+  -webkit-font-smoothing:antialiased;
 }
 header{
   background:#222;
@@ -45,6 +47,7 @@ main{
 }
 .free-item{
   min-width:140px;
+  flex:1 1 140px;
   padding:10px;
   border-radius:8px;
   text-align:center;
@@ -69,6 +72,8 @@ button{
   color:white;
   border:none;
   cursor:pointer;
+  /* touch target */
+  min-height:44px;
 }
 .car-area{
   display:flex;
@@ -77,8 +82,8 @@ button{
   align-items:flex-start;
 }
 .car-visual{
-  flex:1;
-  min-width:260px;
+  flex:1 1 260px;
+  min-width:0;
 }
 .seatRect{
   transition:all .12s;
@@ -110,11 +115,13 @@ button{
 .table-wrap{
   overflow:auto;
   border-radius:8px;
+  -webkit-overflow-scrolling:touch;
 }
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:600px;
+  /* avoid forcing horizontal scroll on small devices; allow wrap or scroll from container */
+  min-width:0;
 }
 th,td{
   padding:10px;
@@ -144,8 +151,9 @@ footer{
     gap: 8px;
   }
   table{
-    min-width: 100%;
-    font-size: 0.9rem;
+    /* keep table readable but allow horizontal scroll within .table-wrap */
+    min-width:100%;
+    font-size:0.92rem;
   }
   input, select, button{
     font-size: 0.9rem;
@@ -157,4 +165,22 @@ footer{
   .car-visual{
     min-width: 100%;
   }
+}
+
+/* Smaller phones / very narrow screens */
+@media (max-width:480px){
+  header{padding:10px;font-size:1rem}
+  .card{padding:10px;border-radius:8px}
+  .free-item{min-width:100%;flex-basis:100%}
+  .top-row{gap:6px}
+  .seat-pill{padding:10px;font-size:.95rem}
+  button{min-height:48px;padding:12px}
+  th,td{padding:8px}
+  .big{font-size:1rem}
+  footer{margin-top:20px}
+}
+
+/* Larger screens: ensure table has minimum readable width */
+@media (min-width:1000px){
+  table{min-width:700px}
 }
