@@ -85,6 +85,12 @@ button{
   flex:1 1 260px;
   min-width:0;
 }
+
+/* New styles for combined car + booking card and legend */
+.car-booking{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.car-booking .car-visual{flex:1 1 420px;min-width:260px}
+.car-booking .form-side{flex:0 0 320px;min-width:220px}
+.legend{flex:0.8;min-width:220px}
 .seatRect{
   transition:all .12s;
 }
