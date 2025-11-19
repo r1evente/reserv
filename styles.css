@@ -26,6 +26,27 @@ main{
   max-width:980px;
   margin:0 auto;
 }
+
+/* Center everything visually: center cards and their inner content */
+main{display:flex;flex-direction:column;align-items:center}
+.card{width:100%;max-width:980px;display:flex;flex-direction:column;align-items:center}
+.card > *{width:100%}
+
+/* center row-based layout blocks */
+.top-row{justify-content:center}
+.free-box{justify-content:center}
+.car-booking{justify-content:center}
+
+/* form layout: keep inputs full-width but center the form block */
+form{width:100%;max-width:460px}
+input,select,button{box-sizing:border-box}
+
+/* center svg inside car visual */
+.car-visual svg{display:block;margin:0 auto}
+
+/* center table container and shrink table on small screens */
+.table-wrap{width:100%}
+table{max-width:100%}
 .card{
   background:var(--card);
   border-radius:10px;
