@@ -47,6 +47,9 @@ input,select,button{box-sizing:border-box}
 /* center table container and shrink table on small screens */
 .table-wrap{width:100%}
 table{max-width:100%}
+
+/* Make the top free-box card wider than other cards */
+.top-card{max-width:1200px}
 .card{
   background:var(--card);
   border-radius:10px;
