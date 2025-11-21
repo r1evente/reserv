@@ -44,8 +44,15 @@
 						<rect x="20" y="20" rx="16" ry="16" width="440" height="220" fill="#e9eef2" stroke="#c7d2d9"></rect>
 
 						<g id="seat-0" transform="translate(60,40)" data-seat="0" aria-hidden="true">
+							<!-- Background rect (kept for layout) -->
 							<rect width="80" height="60" rx="8" class="seatRect" fill="#f7fff7" stroke="#9ccc65"></rect>
-							<text x="10" y="38" font-size="14" fill="#222">Sofőr</text>
+							<!-- Driver image: place an image inside the same group so layout doesn't change. 
+								 Put a file named `driver.png` in the project root (or change href to your path). -->
+							<image id="driverImg" href="sofor.jpg" x="0" y="0" width="80" height="60" preserveAspectRatio="xMidYMid slice" />
+							<!-- Overlay stroke to keep border visible above the image -->
+							<rect width="80" height="60" rx="8" fill="none" stroke="#9ccc65" pointer-events="none"></rect>
+							<!-- Optional label (kept for accessibility) -->
+							<text x="10" y="38" font-size="14" fill="#222" style="pointer-events:none;">Sofőr</text>
 						</g>
 
 						<g id="seat-1" transform="translate(220,40)" data-seat="1">
