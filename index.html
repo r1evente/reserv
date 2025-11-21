@@ -40,24 +40,27 @@
 						</select>
 					</div>
 
-					<svg viewBox="0 0 480 260" width="100%" height="260" aria-hidden="false" role="img">
-						<rect x="20" y="20" rx="16" ry="16" width="440" height="220" fill="#e9eef2" stroke="#c7d2d9"></rect>
+										<svg viewBox="0 0 480 260" width="100%" height="260" aria-hidden="false" role="img">
+												<rect x="20" y="20" rx="16" ry="16" width="440" height="220" fill="#e9eef2" stroke="#c7d2d9"></rect>
+												<defs>
+													<!-- clip for rounded driver image -->
+													<clipPath id="seat0Clip">
+														<rect width="80" height="60" rx="8" ry="8" x="0" y="0" />
+													</clipPath>
+												</defs>
 
 						<g id="seat-0" transform="translate(60,40)" data-seat="0" aria-hidden="true">
 							<!-- Background rect (kept for layout) -->
 							<rect width="80" height="60" rx="8" class="seatRect" fill="#f7fff7" stroke="#9ccc65"></rect>
-							<!-- Driver image: place an image inside the same group so layout doesn't change. 
-								 Put a file named `driver.png` in the project root (or change href to your path). -->
-							<image id="driverImg" href="sofor.jpg" x="0" y="0" width="80" height="60" preserveAspectRatio="xMidYMid slice" />
-							<!-- Overlay stroke to keep border visible above the image -->
-							<rect width="80" height="60" rx="8" fill="none" stroke="#9ccc65" pointer-events="none"></rect>
-							<!-- Optional label (kept for accessibility) -->
-							<text x="10" y="38" font-size="14" fill="#222" style="pointer-events:none;">Sofőr</text>
+					   <!-- Driver image: keep rounded corners using the clipPath; place image file `driver.png` in project root or change href -->
+					   <image id="driverImg" href="driver.png" x="0" y="0" width="80" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#seat0Clip)" />
+					   <!-- Overlay stroke to keep border visible above the image -->
+					   <rect width="80" height="60" rx="8" fill="none" stroke="#9ccc65" pointer-events="none"></rect>
 						</g>
 
 						<g id="seat-1" transform="translate(220,40)" data-seat="1">
 							<rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
-							<text x="10" y="38" font-size="14" fill="#222">Első utas</text>
+							<text x="10" y="38" font-size="14" fill="#222">Anyós</text>
 						</g>
 
 						<g id="seat-2" transform="translate(60,130)" data-seat="2">
@@ -84,7 +87,7 @@
 						<h2 class="h2-compact">Foglalás</h2>
 						<form id="bookingForm" class="card">
 							<label for="name">Neved</label>
-							<input id="name" type="text" placeholder="Pl. János" required />
+							<input id="name" type="text" placeholder="Pl. József" required />
 							<label for="day">Nap</label>
 							<select id="day" required><option value="friday">Péntek</option><option value="sunday">Vasárnap</option></select>
 							<label for="seatsCount">Hány helyet szeretnél?</label>
