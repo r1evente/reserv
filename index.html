@@ -436,9 +436,12 @@ document.addEventListener('DOMContentLoaded', () => {
   nextFridayDate = getNextDate(DAYS.FRIDAY);
   nextSundayDate = getNextDate(DAYS.SUNDAY);
 
-  renderHeaderBoxes();
-  renderCarVisual();
-  renderBookingsTable();
+	renderHeaderBoxes();
+	renderCarVisual();
+	renderBookingsTable();
+
+	// Open info modal automatically on every page load (small delay to ensure layout)
+	try{ setTimeout(openInfo, 200); } catch(e){}
   });
 </script>
 </body>
