@@ -10,9 +10,33 @@
 
 </head>
 <body>
-  <header><h1>Passat Helyfoglalás</h1>
-  	<a href="admin.html" class="admin-btn" title="Admin oldal">Admin</a>
-  </header>
+	<header class="site-header"><h1>Passat Helyfoglalás</h1>
+		<div style="display:flex;align-items:center;gap:6px">
+			<button id="infoBtn" class="info-btn" title="Információ" aria-label="Információ">i</button>
+			<a href="admin.html" class="admin-btn" title="Admin oldal">Admin</a>
+		</div>
+	</header>
+
+	<!-- Info modal (hidden by default) -->
+	<div id="infoModalBackdrop" class="modal-backdrop" aria-hidden="true">
+	  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+	    <h2 id="infoTitle">Rövid tájékoztató</h2>
+	    <div class="modal-body">
+	      <p>Üdv a helyfoglaló felületen! Néhány hasznos tipp:</p>
+	      <ul>
+	        <li>Először válassz napot a <strong>Nap</strong> vagy <strong>Megtekintés nap</strong> menüből.</li>
+	        <li>Kiválaszthatsz egy vagy több ülést a felülnézeti ábrán (a sofőr ülés nem foglalható).</li>
+	        <li>Ha nem választasz ülés(eke)t, a rendszer automatikusan kiosztja a szabad helyeket.</li>
+	        <li>A foglalást a <strong>Neved</strong> és a helyek számának megadása után küldheted el.</li>
+	        <li>Admin felület a jobb felső sarokban: <strong>Admin</strong> — csak a szerver által kezelt foglalásokhoz fér hozzá.</li>
+	      </ul>
+	      <p class="muted">Bezáráshoz használhatod a Bezárás gombot, a háttérre koppintást vagy az Esc billentyűt.</p>
+	    </div>
+	    <div class="modal-footer">
+	      <button id="closeInfoBtn" class="close-btn">Bezárás</button>
+	    </div>
+	  </div>
+	</div>
 
   <main>
 			<section class="top-row">
@@ -55,14 +79,14 @@
 							<!-- Background rect (kept for layout) -->
 							<rect width="80" height="60" rx="8" class="seatRect" fill="#f7fff7" stroke="#9ccc65"></rect>
 					   <!-- Driver image: keep rounded corners using the clipPath; place image file `driver.png` in project root or change href -->
-					   <image id="driverImg" href="sofor.jpg" x="0" y="0" width="80" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#seat0Clip)" />
+					   <image id="driverImg" href="driver.png" x="0" y="0" width="80" height="60" preserveAspectRatio="xMidYMid slice" clip-path="url(#seat0Clip)" />
 					   <!-- Overlay stroke to keep border visible above the image -->
 					   <rect width="80" height="60" rx="8" fill="none" stroke="#9ccc65" pointer-events="none"></rect>
 						</g>
 
 						<g id="seat-1" transform="translate(220,40)" data-seat="1">
 							<rect width="80" height="60" rx="8" class="seatRect seat free" fill="#e6fff0" stroke="#4CAF50"></rect>
-							<text x="10" y="38" font-size="14" fill="#222">Anyós</text>
+							<text x="10" y="38" font-size="14" fill="#222">Első utas</text>
 						</g>
 
 						<g id="seat-2" transform="translate(60,130)" data-seat="2">
@@ -89,7 +113,7 @@
 						<h2 class="h2-compact">Foglalás</h2>
 						<form id="bookingForm" class="card">
 							<label for="name">Neved</label>
-							<input id="name" type="text" placeholder="Pl. József" required />
+							<input id="name" type="text" placeholder="Pl. János" required />
 							<label for="day">Nap</label>
 							<select id="day" required><option value="friday">Péntek</option><option value="sunday">Vasárnap</option></select>
 							<label for="seatsCount">Hány helyet szeretnél?</label>
@@ -149,10 +173,10 @@ const DAYS = {
     SUNDAY: 'sunday',
 };
 const SEAT_LABELS = {
-    1: 'Anyós',
-    2: 'HB',
-    3: 'HK',
-    4: 'HJ',
+    1: 'Első utas',
+    2: 'Hátsó bal',
+    3: 'Hátsó közép',
+    4: 'Hátsó jobb',
     0: 'Sofőr'
 };
 
@@ -186,6 +210,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Firebase reference
   const bookingsRef = db.ref('bookings');
+
+	 // Info modal wiring: open/close, backdrop click, Esc and focus restore
+	 const infoBtn = document.getElementById('infoBtn');
+	 const infoBackdrop = document.getElementById('infoModalBackdrop');
+	 const closeInfoBtn = document.getElementById('closeInfoBtn');
+	 const previouslyFocused = { el: null };
+
+	 function openInfo(){
+		 previouslyFocused.el = document.activeElement;
+		 infoBackdrop.classList.add('show');
+		 infoBackdrop.setAttribute('aria-hidden','false');
+		 closeInfoBtn.focus();
+	 }
+	 function closeInfo(){
+		 infoBackdrop.classList.remove('show');
+		 infoBackdrop.setAttribute('aria-hidden','true');
+		 try{ if(previouslyFocused.el) previouslyFocused.el.focus(); } catch(e){}
+	 }
+
+	 if(infoBtn && infoBackdrop){
+		 infoBtn.addEventListener('click', openInfo);
+		 closeInfoBtn && closeInfoBtn.addEventListener('click', closeInfo);
+		 // close when background tapped
+		 infoBackdrop.addEventListener('click', (ev)=>{ if(ev.target === infoBackdrop) closeInfo(); });
+		 // close on Esc
+		 document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') closeInfo(); });
+	 }
 
   // Segédfüggvény: következő péntek/vasárnap
   function getNextDate(dayName){
@@ -392,8 +443,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
-
 
 
