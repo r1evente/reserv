@@ -4,8 +4,9 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin — Autós Helyfoglalás</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:0}
-    .wrap{max-width:980px;margin:20px auto;padding:16px}
+    /* Lightweight responsive admin styles */
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:980px;margin:16px auto;padding:14px}
     .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.07);margin-bottom:12px}
     input,button,select{padding:10px;border-radius:8px;border:1px solid #ddd;font-size:1rem}
     button{background:#4CAF50;color:#fff;border:none;cursor:pointer}
@@ -13,6 +14,22 @@
     table{width:100%;border-collapse:collapse;margin-top:8px}
     th,td{padding:10px;border-bottom:1px solid #eee;text-align:center}
     .muted{color:#666;font-size:.95rem}
+
+    /* Controls and responsive behavior */
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .controls input,.controls button{min-height:44px}
+
+    /* Table container enables horizontal scroll on small screens */
+    .table-wrap{overflow:auto;border-radius:8px;-webkit-overflow-scrolling:touch;padding:6px;background:transparent}
+
+    /* Small-screen adjustments */
+    @media (max-width:700px){
+      .wrap{margin:10px;padding:10px}
+      .controls{flex-direction:column;align-items:stretch}
+      .controls input,.controls button{width:100%}
+      th,td{padding:8px;font-size:0.95rem}
+      .card{padding:12px}
+    }
   </style>
   
 </head>
@@ -21,7 +38,7 @@
     <div class="card">
       <h2>Admin belépés</h2>
       <div class="muted">Adj meg egy egyszerű jelszót a belépéshez (alap: <strong>admin</strong>)</div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <div class="controls" style="margin-top:8px">
         <input id="pwd" type="password" placeholder="Jelszó" />
         <button id="loginBtn">Belépés</button>
       </div>
@@ -32,7 +49,7 @@
       <div class="card">
         <h2>Admin kezelőfelület</h2>
         <div class="muted">Itt törölhetsz foglalásokat, újraszámolhatod az üléseket vagy exportálhatod.</div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <div class="controls" style="margin-top:10px">
           <button id="reassignBtn">Ülések újraszámolása</button>
           <button id="deleteAllBtn" class="danger">Összes foglalás törlése</button>
           <button id="exportBtn">Exportálás (JSON)</button>
@@ -42,7 +59,9 @@
 
       <div class="card">
         <h3>Foglalások (minden)</h3>
-        <table id="adminTable"><thead><tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ülések</th><th>Művelet</th></tr></thead><tbody></tbody></table>
+        <div class="table-wrap">
+          <table id="adminTable"><thead><tr><th>Név</th><th>Nap</th><th>Dátum</th><th>Idő</th><th>Ülések</th><th>Művelet</th></tr></thead><tbody></tbody></table>
+        </div>
       </div>
     </div>
 
@@ -70,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const db = firebase.database();
   const bookingsRef = db.ref('bookings');
   
-  const ADMIN_PWD = '123'; // egyszerű jelszó (prototípushoz)
+  const ADMIN_PWD = 'xcvb'; // egyszerű jelszó (prototípushoz)
   
   // UI
   const loginBtn = document.getElementById('loginBtn');
@@ -110,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const tdDate = document.createElement('td'); tdDate.textContent = b.date;
       const tdTime = document.createElement('td'); tdTime.textContent = b.time;
       const tdSeats = document.createElement('td'); tdSeats.textContent = (b.seatsAssigned || []).map(i=>{
-        if(i===1) return 'Első utas';
-        if(i===2) return 'Hátsó bal';
-        if(i===3) return 'Hátsó közép';
-        if(i===4) return 'Hátsó jobb';
+        if(i===1) return 'Anyós';
+        if(i===2) return 'HB';
+        if(i===3) return 'HK';
+        if(i===4) return 'HJ';
         return '';
       }).join(', ');
       const tdAction = document.createElement('td');
