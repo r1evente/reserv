@@ -136,8 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
       }).join(', ');
       const tdAction = document.createElement('td');
-      const delBtn = document.createElement('button'); delBtn.textContent = 'Törlés'; delBtn.style.background='#e74c3c'; delBtn.style.color='#fff'; delBtn.style.border='none'; delBtn.style.padding='6px 10px'; delBtn.style.borderRadius='6px'; delBtn.style.cursor='pointer';
-      delBtn.addEventListener('click', async ()=>{
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.textContent = 'Törlés';
+      delBtn.setAttribute('aria-label', 'Törlés ' + (b.name || ''));
+      delBtn.style.background = '#e74c3c';
+      delBtn.style.color = '#fff';
+      delBtn.style.border = 'none';
+      delBtn.style.padding = '6px 10px';
+      delBtn.style.borderRadius = '6px';
+      delBtn.style.cursor = 'pointer';
+      delBtn.style.minHeight = '42px';
+
+      // Handler used for both click and touchend to improve iOS responsiveness
+      const handleDelete = async (ev) => {
+        try{ ev.preventDefault(); ev.stopPropagation(); } catch(e){}
         if(!confirm('Biztos törlöd a foglalást?')) return;
         // delete in firebase by child id (bookings stored by push key maybe -> find key)
         // to delete we must find the child whose value.id === b.id
@@ -151,7 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
         alert('Nem található a foglalás törlésre.');
-      });
+      };
+
+      delBtn.addEventListener('click', handleDelete);
+      // some iOS browsers trigger touchend but not click when inside scrollable containers; attach both
+      delBtn.addEventListener('touchend', handleDelete, {passive:false});
       tdAction.appendChild(delBtn);
       tr.appendChild(tdName); tr.appendChild(tdDay); tr.appendChild(tdDate); tr.appendChild(tdTime); tr.appendChild(tdSeats); tr.appendChild(tdAction);
       adminTbody.appendChild(tr);
