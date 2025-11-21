@@ -18,8 +18,47 @@ body{
 header{
   background:#222;
   color:white;
-  padding:14px;
-  text-align:center;
+  padding:14px 16px;
+  /* layout: title left, admin button right */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.admin-btn{
+  display:inline-block;
+  color:#fff;
+  text-decoration:none;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:transparent;
+  font-weight:600;
+}
+.admin-btn:hover{background:rgba(255,255,255,0.04)}
+
+/* small info button beside admin (icon-like) */
+.info-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  margin-left:8px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:transparent;
+  color:#fff;
+  font-weight:700;
+  text-decoration:none;
+}
+.info-btn:hover{background:rgba(255,255,255,0.04)}
+
+/* Keep header centered appearance on very small screens */
+@media (max-width:420px){
+  header{padding:12px}
+  .admin-btn{padding:6px 8px;font-size:.95rem}
 }
 main{
   padding:14px;
@@ -213,4 +252,21 @@ footer{
 /* Larger screens: ensure table has minimum readable width */
 @media (min-width:1000px){
   table{min-width:700px}
+}
+
+/* Modal / Info popup */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:1200}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:var(--card);
+  color:inherit;
+  width:100%;max-width:720px;border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.25);
+}
+.modal h2{margin-top:0}
+.modal .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.modal .close-btn{background:transparent;border:1px solid #ddd;padding:8px 12px;border-radius:8px;cursor:pointer}
+
+@media (max-width:480px){
+  .modal{max-width:100%;padding:14px}
+  .info-btn{width:34px;height:34px}
 }
